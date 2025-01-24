@@ -1,0 +1,8 @@
+.appbar {
+    --app-bar-height: 64px; /* Définit la hauteur comme variable CSS */
+    height: var(--app-bar-height); /* Applique la variable pour cohérence */
+  }
+
+.main-content {
+    padding-top: var(--app-bar-height);
+}
