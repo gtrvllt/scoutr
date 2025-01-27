@@ -1,9 +1,10 @@
 "use client";
+
 import React from 'react';
 import Link from 'next/link';
 import { useState } from 'react';
 import BurgerMenu from './BurgerMenu'; // Assurez-vous d'avoir un composant BurgerMenu
-import AcmeLogo from 'app/ui/acme-logo';
+import AcmeLogo from 'app/ui/scoutr-logo';
 import '@/ui/global.css';
 
 const AppBar = () => {
@@ -14,7 +15,7 @@ const AppBar = () => {
   };
 
   return (
-    <header className="bg-blue-500 text-white p-4 flex items-center justify-between appbar fixed w-full">
+    <header className="bg-gray-900 text-white p-4 flex items-center justify-between appbar fixed w-full">
       <div className="flex items-center">
         <button className="md:hidden" onClick={toggleMenu}>
           {/* Icone burger */}
@@ -32,7 +33,7 @@ const AppBar = () => {
         <Link href="/contact" className="hover:text-gray-300">Contact</Link>
       </nav>
 
-      {menuOpen && <BurgerMenu />}
+      {/* {menuOpen && <BurgerMenu />} */}
     </header>
   );
 };

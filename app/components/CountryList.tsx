@@ -15,7 +15,7 @@ export const CountryList = () => {
                     <li key={country.code}>
                         <Link
                             href={`/country/${country.code}`}
-                            className="block text-blue-500 hover:underline"
+                            className="block p-1 text-gray-900 hover:bg-gray-900 hover:text-white transition duration-300 ease-in-out"
                         >
                             {country.name}
                         </Link>
