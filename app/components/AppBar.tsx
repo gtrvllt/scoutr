@@ -1,38 +1,32 @@
-"use client";
-
-import React from 'react';
-import Link from 'next/link';
-import { useState } from 'react';
-import BurgerMenu from './BurgerMenu'; // Assurez-vous d'avoir un composant BurgerMenu
-import AcmeLogo from 'app/ui/scoutr-logo';
-import '@/ui/global.css';
+import React from "react";
+import Link from "next/link";
+import Logo from "@/ui/logo.svg";
+import Image from "next/image";
+import UserButton from "@/components/UserButton";
+// import { useState } from 'react';
+// import BurgerMenu from './BurgerMenu';  Assurez-vous d'avoir un composant BurgerMenu
+import "@/ui/global.css";
 
 const AppBar = () => {
-  const [menuOpen, setMenuOpen] = useState(false);
-
-  const toggleMenu = () => {
-    setMenuOpen(!menuOpen);
-  };
+  // const [menuOpen, setMenuOpen] = useState(false)
+  // const toggleMenu = () => {
+  //   setMenuOpen(!menuOpen);
+  // };
 
   return (
-    <header className="bg-gray-900 text-white p-4 flex items-center justify-between appbar fixed w-full">
+    <header className="text-white p-4 flex items-center justify-center justify-between appbar fixed w-full">
       <div className="flex items-center">
-        <button className="md:hidden" onClick={toggleMenu}>
-          {/* Icone burger */}
-          <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16m-7 6h7" />
-          </svg>
-        </button>
-        <h1 className="text-lg font-bold ml-4">
-          <Link href="/"><AcmeLogo /></Link>
-        </h1>
+        {/* <BurgerMenu></BurgerMenu> */}
+        <Link href="/">
+          <Image
+            src={Logo}
+            alt="Logo"
+            className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2"
+          ></Image>
+        </Link>
       </div>
 
-      <nav className="hidden md:flex space-x-4">
-        <Link href="/about" className="hover:text-gray-300">About</Link>
-        <Link href="/contact" className="hover:text-gray-300">Contact</Link>
-      </nav>
-
+      <UserButton></UserButton>
       {/* {menuOpen && <BurgerMenu />} */}
     </header>
   );
