@@ -12,12 +12,12 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body>
-        <AppBar className="mt-0" />
+        <AppBar />
         <main className="main-content flex h-full">
           <aside className="w-1/4 country-list-container">
             <CountryList />
           </aside>
-          <div className="flex-1 p-4 main-container">{children}</div>
+          <div className="flex-1 main-container">{children}</div>
         </main>
       </body>
     </html>
