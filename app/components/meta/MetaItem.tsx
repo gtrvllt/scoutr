@@ -19,7 +19,7 @@ export interface MetaProps {
 
 const MetaItem = ({ meta }: { meta: MetaProps }) => {
     return (
-        <div className="meta p-4 shadow-sm mb-4 grid grid-cols-2 gap-4">
+        <div className="meta pt-4 shadow-sm mb-4 grid grid-cols-2 gap-4">
             {/* Image à gauche */}
             <div className="meta-image-container">
                 {meta.image_url ? (

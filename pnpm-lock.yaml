@@ -26,6 +26,9 @@ dependencies:
   git:
     specifier: ^0.1.5
     version: 0.1.5
+  leaflet:
+    specifier: ^1.9.4
+    version: 1.9.4
   next:
     specifier: latest
     version: 15.1.6(react-dom@19.0.0)(react@19.0.0)
@@ -41,6 +44,9 @@ dependencies:
   react-dom:
     specifier: 19.0.0
     version: 19.0.0(react@19.0.0)
+  react-leaflet:
+    specifier: ^5.0.0
+    version: 5.0.0(leaflet@1.9.4)(react-dom@19.0.0)(react@19.0.0)
   tailwindcss:
     specifier: 3.4.16
     version: 3.4.16
@@ -461,6 +467,18 @@ packages:
     requiresBuild: true
     dev: false
     optional: true
+
+  /@react-leaflet/core@3.0.0(leaflet@1.9.4)(react-dom@19.0.0)(react@19.0.0):
+    resolution: {integrity: sha512-3EWmekh4Nz+pGcr+xjf0KNyYfC3U2JjnkWsh0zcqaexYqmmB5ZhH37kz41JXGmKzpaMZCnPofBBm64i+YrEvGQ==}
+    peerDependencies:
+      leaflet: ^1.9.0
+      react: ^19.0.0
+      react-dom: ^19.0.0
+    dependencies:
+      leaflet: 1.9.4
+      react: 19.0.0
+      react-dom: 19.0.0(react@19.0.0)
+    dev: false
 
   /@supabase/auth-js@2.67.3:
     resolution: {integrity: sha512-NJDaW8yXs49xMvWVOkSIr8j46jf+tYHV0wHhrwOaLLMZSFO4g6kKAf+MfzQ2RaD06OCUkUHIzctLAxjTgEVpzw==}
@@ -1091,6 +1109,10 @@ packages:
     resolution: {integrity: sha512-AMlnetc9+CV9asI19zHmrgS/WYsWUwCn2R7RzlbJWD7F9eWYUTGyBmU9o6PxngtLGOiDGPRu+Uc4fhKzbpteZQ==}
     dev: false
 
+  /leaflet@1.9.4:
+    resolution: {integrity: sha512-nxS1ynzJOmOlHp+iL3FyWqK89GtNL8U8rvlMOsQdTTssxZwCXh8N2NB3GDQOL+YR3XnWyZAxwQixURb+FA74PA==}
+    dev: false
+
   /lilconfig@3.1.3:
     resolution: {integrity: sha512-/vlFKAoH5Cgt3Ie+JLhRbwOsCQePABiU3tJ1egGvyQ+33R/vcwM2Zl2QR/LzjsBeItPt3oSVXapn+m4nQDvpzw==}
     engines: {node: '>=14'}
@@ -1481,6 +1503,19 @@ packages:
     dependencies:
       react: 19.0.0
       scheduler: 0.25.0
+    dev: false
+
+  /react-leaflet@5.0.0(leaflet@1.9.4)(react-dom@19.0.0)(react@19.0.0):
+    resolution: {integrity: sha512-CWbTpr5vcHw5bt9i4zSlPEVQdTVcML390TjeDG0cK59z1ylexpqC6M1PJFjV8jD7CF+ACBFsLIDs6DRMoLEofw==}
+    peerDependencies:
+      leaflet: ^1.9.0
+      react: ^19.0.0
+      react-dom: ^19.0.0
+    dependencies:
+      '@react-leaflet/core': 3.0.0(leaflet@1.9.4)(react-dom@19.0.0)(react@19.0.0)
+      leaflet: 1.9.4
+      react: 19.0.0
+      react-dom: 19.0.0(react@19.0.0)
     dev: false
 
   /react@19.0.0:
