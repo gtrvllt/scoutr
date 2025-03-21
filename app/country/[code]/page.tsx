@@ -4,6 +4,7 @@ import { supabase } from "@/lib/supabase";
 import MetaItem from "@/components/meta/MetaItem";
 import CountryHeader from "@/components/country/CountryHeader";
 
+
 export default async function CountryPage({
   params,
 }: {

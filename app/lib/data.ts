@@ -4,6 +4,7 @@ import { Meta } from './definitions';
 export async function fetchMetas() {
   try {
     const data = await supabase.from('metas').select('*');
+    console.log('ABC data fetch', data)
     return data.rows;
   } catch (error) {
     console.error('fetchMetas Error:', error);
