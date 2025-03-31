@@ -3,6 +3,7 @@ import { fetchMetas } from "app/lib/data";
 import { supabase } from "@/lib/supabase";
 import MetaItem from "@/components/meta/MetaItem";
 import CountryHeader from "@/components/country/CountryHeader";
+import AddMeta from "@/components/AddMeta";
 
 
 export default async function CountryPage({
@@ -29,6 +30,7 @@ export default async function CountryPage({
     <>
       <div className="country-page-content">
         <CountryHeader country={country}></CountryHeader>
+        <AddMeta></AddMeta>
         <div className="meta-list">
           {metas.map((meta) => {
             return <MetaItem key={meta.id} meta={meta} />;

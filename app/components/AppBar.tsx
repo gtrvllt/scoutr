@@ -1,32 +1,50 @@
-import React from "react";
+"use client";
+import React, { useState } from "react";
 import Link from "next/link";
 import Logo from "@/ui/logo.svg";
 import Image from "next/image";
-import UserButton from "@/components/UserButton";
+import { motion, AnimatePresence } from "framer-motion";
 // import { useState } from 'react';
-// import BurgerMenu from './BurgerMenu';  Assurez-vous d'avoir un composant BurgerMenu
+import BurgerMenu from "./BurgerMenu";
 import "@/ui/global.css";
 
 const AppBar = () => {
-  // const [menuOpen, setMenuOpen] = useState(false)
-  // const toggleMenu = () => {
-  //   setMenuOpen(!menuOpen);
-  // };
+  const [isOpen, setIsOpen] = useState(false);
+
+  const toggleMenu = () => {
+    setIsOpen(!isOpen);
+  };
 
   return (
-    <header className="text-white p-4 flex items-center justify-center justify-between appbar fixed w-full">
-      <div className="flex items-center">
-        {/* <BurgerMenu></BurgerMenu> */}
-        <Link href="/">
-          <Image
-            src={Logo}
-            alt="Logo"
-            className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2"
-          ></Image>
-        </Link>
+    <header className="fixed top-0text-white px-4 flex items-center justify-center justify-between appbar fixed w-full">
+      <div className="flex items-center h-full">
+        <BurgerMenu isOpen={isOpen} toggleMenu={toggleMenu} />
+        <AnimatePresence>
+          {isOpen && (
+            <motion.div
+              className="menu-items flex space-x-4 pl-4 h-full"
+              initial={{ x: 0, opacity: 0 }}
+              animate={isOpen ? { x: 40, opacity: 1 } : { x: 100, opacity: 0 }}
+              exit={{ x: 0, opacity: 0 }}
+              transition={{ duration: 0.3 }}
+            >
+              <div className="menu-items flex space-x-4 pl-4">
+                <button className="menu-item">Newsletter</button>
+                <button className="menu-item">About us</button>
+                <button className="menu-item">Donate</button>
+                <button className="menu-item">Terms of use</button>
+              </div>
+            </motion.div>
+          )}
+        </AnimatePresence>
+        <div className="absolute right-4">
+          <Link href="/">
+            <Image src={Logo} alt="Logo" className="h-8 w-auto"></Image>
+          </Link>
+        </div>
       </div>
 
-      <UserButton></UserButton>
+      {/* <UserButton></UserButton> */}
       {/* {menuOpen && <BurgerMenu />} */}
     </header>
   );

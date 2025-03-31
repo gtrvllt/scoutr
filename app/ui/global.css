@@ -26,6 +26,8 @@ input[type="number"]::-webkit-outer-spin-button {
   --app-bar-height: 64px;
 }
 
+/* appbar */
+
 .appbar {
   height: var(--app-bar-height);
   background: #ffffff;
@@ -36,13 +38,24 @@ input[type="number"]::-webkit-outer-spin-button {
 .appbar-logo {
   color: #1d1d1b;
 }
+
+.menu-item {
+  padding-left: 30px;
+  padding-right: 30px;
+}
+.menu-item:hover {
+  background-color: #000;
+  color: #f0f0f0;
+}
+
 .main-content {
   padding-top: var(--app-bar-height);
 }
 /* homepage */
 
 .map-container {
-  height: 100vh;
+  /* height: 100vh; */
+  height: cacl(100vh - var(--app-bar-height));
   width: 100%;
   position: relative;
 }
@@ -53,6 +66,12 @@ input[type="number"]::-webkit-outer-spin-button {
   margin-bottom: 16px;
 }
 
+
+
+.leaflet-container {
+  max-height: 100%;
+}
+
 /* page country */
 
 .country-page-content {
@@ -61,7 +80,7 @@ input[type="number"]::-webkit-outer-spin-button {
   margin-top: 40;
 }
 .country-header {
-  border: 2px solid #1d1d1b;
+  /* border: 2px solid #1d1d1b; */
 }
 
 .meta-type {
@@ -74,4 +93,21 @@ input[type="number"]::-webkit-outer-spin-button {
   max-height: 100%;
   overflow-y: scroll;
   border-right: 2px solid #000000;
+}
+
+/* composant addmeta */
+.add-meta-container {
+  border: 2px solid #000000;
+}
+
+.add-meta-button {
+  width: 100%;
+  box-sizing: border-box;
+  /* Auto layout */
+  display: flex;
+  flex-direction: row;
+  justify-content: center;
+  align-items: center;
+  padding: 16px 0px;
+  gap: 10px;
 }

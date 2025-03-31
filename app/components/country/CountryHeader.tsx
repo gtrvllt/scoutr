@@ -9,7 +9,7 @@ export interface CountryProps {
 
 const CountryHeader = ({ country }: { country: CountryProps }) => {
   return (
-    <div className="country-header p-6">
+    <div className="country-header pb-6">
         <div className="country-details">
             
         </div>
