@@ -2,6 +2,7 @@
 import React, { useState, useEffect } from "react";
 import dynamic from "next/dynamic";
 import { useRouter, usePathname } from "next/navigation";
+import Departure from "./home/Departure";
 import "leaflet/dist/leaflet.css";
 import "@/ui/global.css"; // Importez votre fichier CSS global
 
@@ -93,21 +94,12 @@ const HomeMap: React.FC = () => {
   }
 
   return (
-    <div className="map-container">
-      <div className="hovering-country">
-        Départ pour - {hoveredCountry}{" "}
-        {hoveredCountry
-          ? getFlagEmoji(
-              geojsonData?.features.find(
-                (feature) => feature.properties.name === hoveredCountry
-              )?.properties.iso_a2 ?? ""
-            )
-          : ""}
-      </div>
+    <div className="map-container h-full" style={{backgroundColor: 'red',  padding: '12px'}}>
+      <Departure hoveredCountry={hoveredCountry} />
       <MapContainer
         center={[20, 0]}
         zoom={2}
-        style={{ height: "100%", width: "100%" }}
+        style={{ height: "calc(100% - 30px)", width: "100%" }}
       >
         {/* <TileLayer
           url="https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png"

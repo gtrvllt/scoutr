@@ -4,8 +4,37 @@ import { Meta } from './definitions';
 export async function fetchMetas() {
   try {
     const data = await supabase.from('metas').select('*');
-    console.log('ABC data fetch', data)
     return data.rows;
+  } catch (error) {
+    console.error('fetchMetas Error:', error);
+    throw new Error('Failed to fetch revenue data.');
+  }
+}
+
+export async function fetchTags() {
+  try {
+    const data = await supabase.from('meta-tags').select('*');
+    return data.rows;
+  } catch (error) {
+    console.error('fetchMetas Error:', error);
+    throw new Error('Failed to fetch revenue data.');
+  }
+}
+
+export async function addTag(value:String) {
+  try {
+
+    const response = await supabase
+      .from('meta-tag')
+      .insert([
+        { name: value, created_at: new Date() },
+      ])
+    if (response.error) {
+      console.error('Error adding tag:', response.error);
+      return null;
+    }
+    console.log('Tag added:', response);
+    return response
   } catch (error) {
     console.error('fetchMetas Error:', error);
     throw new Error('Failed to fetch revenue data.');

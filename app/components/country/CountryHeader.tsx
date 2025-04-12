@@ -10,12 +10,12 @@ export interface CountryProps {
 const CountryHeader = ({ country }: { country: CountryProps }) => {
   return (
     <div className="country-header pb-6">
-        <div className="country-details">
-            
-        </div>
+      <div className="country-details">
+
+      </div>
       <h1 className="font-bold">{country.name}</h1>
-      <p>Code: {country.code}</p>
-      <p>Continent: {country.continent.name}</p>
+      <p>Code // {country.code}</p>
+      <p>Continent // {country.continent}</p>
     </div>
   );
 };

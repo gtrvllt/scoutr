@@ -5,7 +5,7 @@ export interface MetaProps {
   id: string;
   user_id?: string;
   country_codes?: Record<string, any>;
-  type: string;
+  tags: string[];
   name: string;
   description: string;
   image_url?: string;
@@ -18,6 +18,16 @@ export interface MetaProps {
 }
 
 const MetaItem = ({ meta }: { meta: MetaProps }) => {
+
+  let tags: string[] = [];
+  try {
+    // Si meta.tags est un JSON stringifié, parsez-le
+    const parsedTags = JSON.parse(meta.tags);
+    tags = Array.isArray(parsedTags) ? parsedTags : Object.values(parsedTags);
+  } catch (error) {
+    // Si ce n'est pas un JSON valide, utilisez un fallback
+    tags = meta.tags.split(',').map((tag) => tag.trim());
+  }
   return (
     <div className="meta pt-4 shadow-sm mb-4 grid grid-cols-2 gap-4">
       {/* Image à gauche */}
@@ -37,16 +47,29 @@ const MetaItem = ({ meta }: { meta: MetaProps }) => {
 
       {/* Texte à droite */}
       <div>
-        <h2 className="text-xl font-bold mb-2">{meta.name}</h2>
+        <div className="meta-header flex items-center mb-2 justify-start" style={{ display: 'flex', alignItems: 'flex-start' }}>
+          <h2 className="text-xl font-bold mb-2 pr-5">{meta.name}</h2>
+          <div className="tags mb-2 ml-auto">
+            {tags.map((tag, index) => (
+              <span
+                key={index}
+                className="inline-block bg-blue-100 text-blue-800 text-xs font-semibold mr-2 px-2.5 py-0.5 rounded"
+              >
+                {tag.trim()}
+              </span>
+            ))}
+          </div>
+        </div>
         <p className="text-gray-700 mb-2">{meta.description}</p>
-        <span className="text-sm text-gray-500 meta-type p-1">{meta.type}</span>
+
+        {/* to do - split tags array */}
         {meta.add_date && (
           <p className="text-sm text-gray-400">
             {new Date(meta.add_date).toLocaleDateString()}
           </p>
         )}
       </div>
-    </div>
+    </div >
   );
 };
 

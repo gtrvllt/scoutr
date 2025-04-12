@@ -2,25 +2,33 @@
 import React, { useState } from "react";
 import { supabase } from "@/lib/supabase";
 import Image from "next/image";
+import Autocomplete from "@/components/inputs/autocomplete";
+import { fetchTags, addTag } from "@/lib/data";
+import { n } from "node_modules/framer-motion/dist/types.d-B50aGbjN";
 
-const AddMeta = () => {
+const AddMeta = ({ country }: { country: { code: string; name: string } }) => {
   const [creatingMeta, setCreatingMeta] = useState(false);
   // metadata
+  // fetch les metas et les tags
+  const [tags, setTags] = useState<[metaTag]>([]);
+  const [selectedTags, setSelectedTags] = useState<string[]>([]);
+
   const [formData, setFormData] = useState<{
     name: string;
     description: string;
-    type: string;
+    tag: string[];
     file: File | null; // 👈 Permet d'accepter un fichier ou null
   }>({
     name: "",
     description: "",
-    type: "",
+    tag: [],
     file: null,
   });
   const [preview, setPreview] = useState<string | null>(null); // Stocke l'URL de prévisualisation
 
   const handleChange = (e) => {
     const { name, value } = e.target;
+    console.log('ABC handleChange', name, value)
     setFormData((prevData) => ({
       ...prevData,
       [name]: value,
@@ -51,11 +59,35 @@ const AddMeta = () => {
     }
   };
 
+  const onKeyDownTagInput = (e) => {
+    if (e.key === "Enter") {
+      e.preventDefault(); // Empêche le saut de ligne
+      const newTag = e.target.value.trim();
+      if (!selectedTags.includes(newTag)) {
+        addTag(newTag).then((res) => {
+          console.log("ABC addTag res", res)
+          // selectedTags.push(newTag)
+          setSelectedTags((prevTags) => [...prevTags, newTag]);
+          formData.tag = []
+        })
+      }
+      // if (!tags.includes(newTag)) {
+      //   addTag(newTag).then((res) => {
+      //     console.log("ABC addTag res", res)
+      //     // setTags((prevTags) => [...prevTags, newTag]);
+      //   }
+      // } else {
+      //   alert("Tag already exists");
+      // }
+    }
+  };
+
   const uploadImage = async (file: File) => {
+    const sanitizedFileName = file.name.replace(/[^a-zA-Z0-9.]/g, '_');
     const { data, error } = await supabase.storage
       .from("images")
-      .upload(`public/${file.name}`, file);
-      // todo - gérer le nom du dossier
+      .upload(`public/${sanitizedFileName}`, file);
+    // todo - gérer le nom du dossier
     if (error) {
       console.error("Erreur lors du téléchargement de l'image :", error);
       return null;
@@ -74,43 +106,43 @@ const AddMeta = () => {
     //   console.error('Erreur lors de la récupération de l\'URL publique :', error);
     //   return null;
     // }
-  
+
     return res.data.publicUrl;
   };
 
   const createMeta = async (data: {
     name: string;
     description: string;
-    type: string;
+    tags: [string];
     file: File;
   }) => {
     const imagePath = await uploadImage(data.file);
     const imageUrl = getPublicUrl(imagePath)
     // const res =  await insertMeta(data, imagePath)
-    const res =  await insertMeta(data, imageUrl)
+    const res = await insertMeta(data, imageUrl, selectedTags)
   }
 
 
   const insertMeta = async (metaData: {
     name: string;
     description: string;
-    type: string;
-  }, imagePath: string | null) => {
+    tags: [string];
+  }, imagePath: string | null, selectedTags: string[]) => {
     // envoyer la requete
-
     const response = await supabase
       .from("metas")
       .insert([
         {
           name: metaData.name,
           description: metaData.description,
-          type: metaData.type,
+          tags: selectedTags,
           user_id: "fb7a25b6-d374-4d91-a658-2d8f4f9c90f1", // current test user
-          country_codes: '["FR"]',
+          country_codes: [country.code],
           image_url: imagePath,
         },
       ])
       .select();
+    console.log('ABC insertMeta response', response)
   };
   return (
     <div className="add-meta-container">
@@ -119,47 +151,101 @@ const AddMeta = () => {
           <div className="image-container">
             {/* {!formData.file ? ( */}
             {!preview ? (
-              <input
-                type="file"
-                name="file"
-                onChange={handleFileChange}
-                style={{ marginRight: "10px" }}
-              />
+
+
+
+              <div className="h-full">
+
+                <div
+                  className="file-input-container flex items-center justify-center h-1/2"
+                  onClick={() => document.getElementById("file-upload-input")?.click()}
+                  style={{ cursor: "pointer" }}
+                >
+                  <input
+                    id="file-upload-input"
+                    type="file"
+                    name="file"
+                    onChange={handleFileChange}
+                    style={{ marginRight: "10px", width: "0", height: "0" }}
+                  />
+                  <div>Upload your picture</div>
+                  <svg width="23" height="23" viewBox="0 0 23 23" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <path d="M17.5238 20.8095H2.19048V5.47619H12.0476V3.28571H2.19048C0.985714 3.28571 0 4.27143 0 5.47619V20.8095C0 22.0143 0.985714 23 2.19048 23H17.5238C18.7286 23 19.7143 22.0143 19.7143 20.8095V10.9524H17.5238V20.8095ZM8.99191 17.3376L6.84524 14.7529L3.83333 18.619H15.881L12.0038 13.4605L8.99191 17.3376ZM19.7143 3.28571V0H17.5238V3.28571H14.2381C14.249 3.29667 14.2381 5.47619 14.2381 5.47619H17.5238V8.75095C17.5348 8.7619 19.7143 8.75095 19.7143 8.75095V5.47619H23V3.28571H19.7143Z" fill="black" />
+                  </svg>
+                </div>
+                <div
+                  className="file-input-container flex items-center justify-center h-1/2"
+                  style={{ height: "50%" }}
+                >
+                  <input
+                    type="text"
+                    placeholder="Or paste your image here"
+                    onPaste={(e) => {
+                      e.preventDefault();
+                      const pastedData = e.clipboardData.getData("text/plain");
+                      console.log("pastedData", pastedData);
+                      console.log("e.clipboardData", e.clipboardData);
+                      if (pastedData.startsWith("http") && (pastedData.endsWith(".jpg") || pastedData.endsWith(".png") || pastedData.endsWith(".jpeg"))) {
+                        setPreview(pastedData);
+                        setFormData((prevData) => ({
+                          ...prevData,
+                          file: null, // Reset file input since we're using a URL
+                        }));
+                      } else {
+                        alert("Please paste a valid image URL (jpg, png, jpeg).");
+                      }
+                    }}
+                    className="paste-image-input border-none"
+                  />
+                </div>
+              </div>
             ) : (
               <Image src={preview} alt="metaImage" height={200} width={250} />
             )}
           </div>
-          <div className="meta-inputs flex flex-col">
-            <input
-              type="text"
-              value={formData.name}
-              onChange={handleChange}
-              placeholder="Name"
-              name="name"
-              className="meta-name-input"
-            />
-            <input
-              type="text"
+          <div className="meta-inputs flex flex-col w-full">
+            <div className="flex w-full space-x-2">
+              <input
+                type="text"
+                value={formData.name}
+                onChange={handleChange}
+                placeholder="Name"
+                name="name"
+                className="meta-name-input border-none w-1/2 px-3 py-2"
+              />
+              <input
+                type="text"
+                value={formData.tag}
+                onChange={handleChange}
+                placeholder="Choose tags"
+                name="tag"
+                className="meta-tags-input border-none w-1/2 px-3 py-2"
+                onKeyDown={onKeyDownTagInput}
+              />
+              {/* <Autocomplete
+                suggestions={["Paris", "Lyon", "Marseille", "Toulouse"]}
+                onSelect={(val) => setFormData({ ...formData, tags: val })}
+                placeholder="Choose a city"
+              /> */}
+              <div className="tags-container flex flex-wrap">
+                {selectedTags.map((tag, index) =>
+                (
+                  <span key={index} className="tag-item bg-gray-200 rounded-full px-2 py-1 mr-2 mb-2">
+                    {tag.trim()}
+                  </span>
+                ))}
+              </div>
+            </div>
+
+            <textarea
+              rows={4}
               value={formData.description}
               onChange={handleChange}
               placeholder="Description"
               name="description"
-              className="meta-description-input"
+              className="meta-description-input border-none w-full resize-none"
             />
-            <input
-              type="text"
-              value={formData.type}
-              onChange={handleChange}
-              placeholder="Type"
-              name="type"
-              className="meta-description-input"
-            />
-            {/* <button
-            className="save-meta-button"
-            onClick={() => createMeta({ name, description, type })}
-            >
-            Save
-            </button> */}
+
           </div>
         </div>
       )}

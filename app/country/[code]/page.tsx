@@ -13,11 +13,15 @@ export default async function CountryPage({
 }) {
   const { code } = await params;
   const country = countries.find((c) => c.code === code);
+  console.log('ABC country:', country);
 
-  const { data: metas, error } = await supabase.from("metas").select("*");
+  const { data: metas, error } = await supabase
+    .from("metas")
+    .select("*")
+    .contains("country_codes", [country?.code]);
+  console.log("metas:", metas);
   fetchMetas();
 
-  console.log("ABC country", country);
   if (!country) {
     return (
       <div>
@@ -30,9 +34,9 @@ export default async function CountryPage({
     <>
       <div className="country-page-content">
         <CountryHeader country={country}></CountryHeader>
-        <AddMeta></AddMeta>
+        <AddMeta country={country}></AddMeta>
         <div className="meta-list">
-          {metas.map((meta) => {
+          {metas?.map((meta) => {
             return <MetaItem key={meta.id} meta={meta} />;
           })}
         </div>

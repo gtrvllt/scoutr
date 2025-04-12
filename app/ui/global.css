@@ -43,6 +43,7 @@ input[type="number"]::-webkit-outer-spin-button {
   padding-left: 30px;
   padding-right: 30px;
 }
+
 .menu-item:hover {
   background-color: #000;
   color: #f0f0f0;
@@ -51,11 +52,10 @@ input[type="number"]::-webkit-outer-spin-button {
 .main-content {
   padding-top: var(--app-bar-height);
 }
+
 /* homepage */
 
 .map-container {
-  /* height: 100vh; */
-  height: cacl(100vh - var(--app-bar-height));
   width: 100%;
   position: relative;
 }
@@ -66,21 +66,26 @@ input[type="number"]::-webkit-outer-spin-button {
   margin-bottom: 16px;
 }
 
-
-
 .leaflet-container {
   max-height: 100%;
 }
 
+/* map */
+
+
+
 /* page country */
 
 .country-page-content {
+  max-height: 100%;
+  overflow-y: scroll;
   padding-left: 30px;
   padding-right: 30px;
-  margin-top: 40;
 }
+
 .country-header {
   /* border: 2px solid #1d1d1b; */
+  padding-top: 30px;
 }
 
 .meta-type {
@@ -94,6 +99,7 @@ input[type="number"]::-webkit-outer-spin-button {
   overflow-y: scroll;
   border-right: 2px solid #000000;
 }
+
 /* composant meta */
 
 .meta-image-container {
@@ -116,10 +122,17 @@ input[type="number"]::-webkit-outer-spin-button {
   align-items: center;
   padding: 16px 0px;
   gap: 10px;
+  height: 56px;
+}
+
+.add-meta-button:hover {
+  box-sizing: border-box;
+  border: 2px solid #000;
 }
 
 .image-container {
   height: 200px;
   width: 300px;
-  border: 2px solid #000000;
+  border-right: 2px solid #000000;
+  border-bottom: 2px solid #000000;
 }

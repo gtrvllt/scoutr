@@ -3,6 +3,9 @@ import "@/ui/global.css";
 import AppBar from "@/components/AppBar";
 import BurgerMenu from "@/components/BurgerMenu";
 import { CountryList } from "./components/CountryList";
+// import dynamic from 'next/dynamic';
+// const AppBar = dynamic(() => import('@/components/AppBar'), { ssr: false });
+// const CountryList = dynamic(() => import('@/components/CountryList'), { ssr: false });
 
 export default function RootLayout({
   children,
