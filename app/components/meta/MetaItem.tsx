@@ -34,7 +34,7 @@ const MetaItem = ({ meta }: { meta: MetaProps }) => {
     <div className="meta pt-4 mb-4 grid grid-cols-2 gap-4 relative">
       {/* Image à gauche */}
       <div
-        className="meta-image-container bg-red-100"
+        className="meta-image-container"
       >
         {meta.image_url ? (
           <img

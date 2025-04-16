@@ -94,7 +94,7 @@ const HomeMap: React.FC = () => {
   }
 
   return (
-    <div className="map-container h-full" style={{backgroundColor: 'red',  padding: '12px'}}>
+    <div className="map-container h-full" style={{ padding: '12px' }}>
       <Departure hoveredCountry={hoveredCountry} />
       <MapContainer
         center={[20, 0]}

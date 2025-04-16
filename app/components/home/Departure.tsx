@@ -20,7 +20,7 @@ const Departure: React.FC<DepartureProps> = ({ hoveredCountry }) => {
     }, [country]);
 
     return (
-        <div id="text-container" className="flex" style={{ padding: '10px', backgroundColor: 'red', overflow: 'hidden', whiteSpace: 'nowrap' }}>
+        <div id="text-container" className="flex" style={{ padding: '10px', overflow: 'hidden', whiteSpace: 'nowrap' }}>
             <motion.span
                 className="texte-defilant"
                 initial={{ x: '100%' }}
