@@ -34,32 +34,7 @@ const MetaList = ({ countryCode }: { countryCode: string }) => {
 
     useEffect(() => {
         refreshMetas();
-        const handleScroll = () => {
-            const stickyDiv = stickyDivRef.current;
-            if (stickyDiv) {
-                const scrollPosition = window.scrollY;
-                console.log('ABC scrollPosition:', scrollPosition);
-
-                // Fixe la div à partir de 100px de défilement
-                if (scrollPosition > 100) {
-                    stickyDiv.style.position = "fixed";
-                    stickyDiv.style.top = "20px"; // Position fixe
-                } else {
-                    stickyDiv.style.position = "static"; // Retour à la position normale
-                }
-            }
-        };
-
-        window.addEventListener("scroll", handleScroll);
-
-        // Nettoyage de l'écouteur d'événements lorsque le composant est démonté
-        return () => {
-            window.removeEventListener("scroll", handleScroll);
-        };
     }, []);
-    // useEffect(() => {
-    //     refreshMetas();
-    // }, [countryCode]);
 
     return (
         <>
