@@ -78,9 +78,9 @@ input[type="number"]::-webkit-outer-spin-button {
 
 .country-page-content {
   max-height: 100%;
-  overflow-y: scroll;
   padding-left: 30px;
   padding-right: 30px;
+  overflow-y: scroll;
 }
 
 .country-header {
@@ -102,9 +102,15 @@ input[type="number"]::-webkit-outer-spin-button {
 
 /* composant meta */
 
+.image-container {
+  max-width: 400px;
+  overflow: hidden;
+}
+
 .meta-image-container {
   max-height: 200px;
   overflow: hidden;
+  /* Assure que l'image est positionnée par rapport à ce conteneur */
 }
 
 /* composant addmeta */
@@ -127,7 +133,7 @@ input[type="number"]::-webkit-outer-spin-button {
 
 .add-meta-button:hover {
   box-sizing: border-box;
-  border: 2px solid #000;
+  border-top: 2px solid #000;
 }
 
 .image-container {

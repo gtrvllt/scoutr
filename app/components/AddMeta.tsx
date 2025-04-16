@@ -4,7 +4,7 @@ import { supabase } from "@/lib/supabase";
 import Image from "next/image";
 import Autocomplete from "@/components/inputs/autocomplete";
 import { fetchTags, addTag } from "@/lib/data";
-import { n } from "node_modules/framer-motion/dist/types.d-B50aGbjN";
+import { v4 as uuidv4 } from 'uuid';
 
 const AddMeta = ({ country }: { country: { code: string; name: string } }) => {
   const [creatingMeta, setCreatingMeta] = useState(false);
@@ -17,7 +17,7 @@ const AddMeta = ({ country }: { country: { code: string; name: string } }) => {
     name: string;
     description: string;
     tag: string[];
-    file: File | null; // 👈 Permet d'accepter un fichier ou null
+    file: File | null;
   }>({
     name: "",
     description: "",
@@ -33,28 +33,70 @@ const AddMeta = ({ country }: { country: { code: string; name: string } }) => {
       ...prevData,
       [name]: value,
     }));
+    console.log('ABC handleChange', formData)
   };
 
   const handleFileChange = (e) => {
-    const file = e.target.files[0];
+    const imageFile = e.target.files[0];
+    const newwImage = renameImage(imageFile)
+    // file.name = "caca" + uuidv4() + ".png"
+    console.log('ABC handleFileChange', imageFile)
     setFormData((prevData) => ({
       ...prevData,
-      file: file,
+      file: newwImage,
     }));
 
-    if (file) {
-      setPreview(URL.createObjectURL(file));
+    if (newwImage) {
+      setPreview(URL.createObjectURL(newwImage));
     } else {
       setPreview(null);
     }
+    console.log('ABC handleFileChange', formData)
   };
 
-  const addMetaClick = () => {
+  const onPasteFile = (e) => {
+    const items = e.clipboardData.items;
+    const imageFile = items[0].getAsFile()
+    const newwImage = renameImage(imageFile)
+    console.log('ABC imageFile', imageFile)
+    if (imageFile?.type.startsWith('image/')) {
+      const t = URL.createObjectURL(newwImage)
+      setPreview(t);
+      // setPreview(imageFile);
+      setFormData((d) => ({
+        ...d,
+        file: newwImage, // Reset file input since we're using a URL
+      }));
+    } else {
+      alert("Please paste a valid image URL (jpg, png, jpeg).");
+    }
+  }
+
+  const renameImage = (imageFile: File) => {
+    // Générer un UUID
+    const uniqueId = uuidv4();
+
+    // Créer un nouveau nom de fichier en ajoutant l'UUID au nom original
+    const uniqueFileName = `${uniqueId}_${imageFile.name}`;
+
+    // Créer un nouvel objet File avec le nom unique
+    const renamedFile = new File([imageFile], uniqueFileName, {
+      type: imageFile.type,
+    });
+
+    return renamedFile;
+  };
+
+  const addMetaClick = async () => {
     // prmier click : ouvrir le formulaire en setant creatingmeta à true
     // deuxieme click : on vérifie que les champs sont remplis et on envoie la requete, puis on ferme le formulaire en setant creatingmeta à false
     setCreatingMeta(!creatingMeta);
     if (creatingMeta && formData.file !== null) {
-      createMeta(formData);
+      const res = await createMeta(formData);
+      if (!res.error) {
+
+      }
+      console.log('ABC addMetaClick res', res)
       setCreatingMeta(false);
     }
   };
@@ -119,7 +161,8 @@ const AddMeta = ({ country }: { country: { code: string; name: string } }) => {
     const imagePath = await uploadImage(data.file);
     const imageUrl = getPublicUrl(imagePath)
     // const res =  await insertMeta(data, imagePath)
-    const res = await insertMeta(data, imageUrl, selectedTags)
+    return await insertMeta(data, imageUrl, selectedTags)
+
   }
 
 
@@ -129,7 +172,7 @@ const AddMeta = ({ country }: { country: { code: string; name: string } }) => {
     tags: [string];
   }, imagePath: string | null, selectedTags: string[]) => {
     // envoyer la requete
-    const response = await supabase
+    return await supabase
       .from("metas")
       .insert([
         {
@@ -137,7 +180,7 @@ const AddMeta = ({ country }: { country: { code: string; name: string } }) => {
           description: metaData.description,
           tags: selectedTags,
           user_id: "fb7a25b6-d374-4d91-a658-2d8f4f9c90f1", // current test user
-          country_codes: [country.code],
+          country_code: country.code,
           image_url: imagePath,
         },
       ])
@@ -147,15 +190,11 @@ const AddMeta = ({ country }: { country: { code: string; name: string } }) => {
   return (
     <div className="add-meta-container">
       {creatingMeta && (
-        <div className="add-meta-formf flex">
-          <div className="image-container">
+        <div className="add-meta-form flex mb-4">
+          <div className="image-container p-4">
             {/* {!formData.file ? ( */}
             {!preview ? (
-
-
-
               <div className="h-full">
-
                 <div
                   className="file-input-container flex items-center justify-center h-1/2"
                   onClick={() => document.getElementById("file-upload-input")?.click()}
@@ -180,27 +219,13 @@ const AddMeta = ({ country }: { country: { code: string; name: string } }) => {
                   <input
                     type="text"
                     placeholder="Or paste your image here"
-                    onPaste={(e) => {
-                      e.preventDefault();
-                      const pastedData = e.clipboardData.getData("text/plain");
-                      console.log("pastedData", pastedData);
-                      console.log("e.clipboardData", e.clipboardData);
-                      if (pastedData.startsWith("http") && (pastedData.endsWith(".jpg") || pastedData.endsWith(".png") || pastedData.endsWith(".jpeg"))) {
-                        setPreview(pastedData);
-                        setFormData((prevData) => ({
-                          ...prevData,
-                          file: null, // Reset file input since we're using a URL
-                        }));
-                      } else {
-                        alert("Please paste a valid image URL (jpg, png, jpeg).");
-                      }
-                    }}
+                    onPaste={(e) => { onPasteFile(e); }}
                     className="paste-image-input border-none"
                   />
                 </div>
               </div>
             ) : (
-              <Image src={preview} alt="metaImage" height={200} width={250} />
+              <Image src={preview} alt="metaImage" height={200} width={250} className="max-h-full object-cover" />
             )}
           </div>
           <div className="meta-inputs flex flex-col w-full">
@@ -250,7 +275,10 @@ const AddMeta = ({ country }: { country: { code: string; name: string } }) => {
         </div>
       )}
       {/* bouton ajout meta */}
-      <button className="add-meta-button disabled" onClick={addMetaClick}>
+      <button
+        className="add-meta-button disabled"
+        onClick={addMetaClick}
+        disabled={creatingMeta && (!formData.name || !formData.description || !formData.file)}>
         Add a meta
         <svg
           width="21"
@@ -265,7 +293,7 @@ const AddMeta = ({ country }: { country: { code: string; name: string } }) => {
           />
         </svg>
       </button>
-    </div>
+    </div >
   );
 };
 

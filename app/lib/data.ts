@@ -44,6 +44,8 @@ export async function addTag(value:String) {
 export async function fetchMetasByCountryCode(code: string) {
   try {
     const data = await supabase.from('metas').select().eq('country_code', code)
+    console.log('ABC data:', data)
+    return data.data
   } catch (error) {
     console.error('fetchMetasByCountryCode error :', error)
   }

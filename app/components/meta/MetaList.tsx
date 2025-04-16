@@ -1,0 +1,78 @@
+"use client";
+import { useEffect, useRef, useState } from "react";
+import countries from "@/lib/countries.json";
+import "@/ui/global.css";
+import { fetchMetasByCountryCode } from "@/lib/data";
+import AddMeta from "../AddMeta";
+import MetaItem from "@/components/meta/MetaItem";
+
+export interface Meta {
+    id: string;
+    user_id?: string;
+    country_code?: string;
+    tags: string[];
+    name: string;
+    description: string;
+    image_url?: string;
+    metadata?: Record<string, any>;
+    add_date?: string;
+    edit_date?: string;
+    created_by?: string;
+    updated_by?: string;
+    original_id?: string;
+}
+const MetaList = ({ countryCode }: { countryCode: string }) => {
+    // const [metas, setMetas] = useState([]);
+    const stickyDivRef = useRef(null);
+    const [metas, setMetas] = useState<Meta[]>([]);
+    const country = countries.find((c) => c.code === countryCode);
+    console.log('ABC country:', country);
+    const refreshMetas = async () => {
+        const updated = await fetchMetasByCountryCode(countryCode);
+        setMetas(Array.isArray(updated) ? updated : []);
+    };
+
+    useEffect(() => {
+        refreshMetas();
+        const handleScroll = () => {
+            const stickyDiv = stickyDivRef.current;
+            if (stickyDiv) {
+                const scrollPosition = window.scrollY;
+                console.log('ABC scrollPosition:', scrollPosition);
+
+                // Fixe la div à partir de 100px de défilement
+                if (scrollPosition > 100) {
+                    stickyDiv.style.position = "fixed";
+                    stickyDiv.style.top = "20px"; // Position fixe
+                } else {
+                    stickyDiv.style.position = "static"; // Retour à la position normale
+                }
+            }
+        };
+
+        window.addEventListener("scroll", handleScroll);
+
+        // Nettoyage de l'écouteur d'événements lorsque le composant est démonté
+        return () => {
+            window.removeEventListener("scroll", handleScroll);
+        };
+    }, []);
+    // useEffect(() => {
+    //     refreshMetas();
+    // }, [countryCode]);
+
+    return (
+        <>
+            <div className="meta-list">
+                <AddMeta country={country} ref={stickyDivRef}></AddMeta>
+                <div className="meta-list">
+                    {metas?.map((meta) => {
+                        return <MetaItem key={meta.id} meta={meta} />;
+                    })}
+                </div>
+            </div>
+        </>
+    );
+}
+
+export default MetaList;
