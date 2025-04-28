@@ -19,6 +19,7 @@ export default async function CountryPage({
   const rawMetas = await fetchMetasByCountryCode(code);
   const metas = Array.isArray(rawMetas) ? rawMetas : [];
   console.log('ABC metas:', metas);
+
   const refreshMetas = async () => {
     console.log('refreshMetas called');
   }

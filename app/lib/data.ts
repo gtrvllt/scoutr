@@ -4,7 +4,8 @@ import { Meta } from './definitions';
 export async function fetchMetas() {
   try {
     const data = await supabase.from('metas').select('*');
-    return data.rows;
+    console.log('fetchMetas data:', data);
+    return data.data;
   } catch (error) {
     console.error('fetchMetas Error:', error);
     throw new Error('Failed to fetch revenue data.');
@@ -14,7 +15,7 @@ export async function fetchMetas() {
 export async function fetchTags() {
   try {
     const data = await supabase.from('meta-tags').select('*');
-    return data.rows;
+    return data.data;
   } catch (error) {
     console.error('fetchMetas Error:', error);
     throw new Error('Failed to fetch revenue data.');

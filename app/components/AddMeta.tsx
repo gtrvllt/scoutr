@@ -6,27 +6,50 @@ import Autocomplete from "@/components/inputs/autocomplete";
 import { fetchTags, addTag } from "@/lib/data";
 import { v4 as uuidv4 } from 'uuid';
 
-const AddMeta = ({ country }: { country: { code: string; name: string } }) => {
+export interface MetaTag {
+  id: string;
+  user_id?: string;
+  country_code?: string;
+  tags: string[];
+  name: string;
+  description: string;
+  image_url?: string;
+  metadata?: Record<string, any>;
+  add_date?: string;
+  edit_date?: string;
+  created_by?: string;
+  updated_by?: string;
+  original_id?: string;
+}
+
+type AddMetaProps = {
+  country: {
+    code: string;
+    name: string;
+  };
+  onMetaAdded: () => void;
+};
+
+const AddMeta = ({ country, onMetaAdded }: AddMetaProps) => {
   const [creatingMeta, setCreatingMeta] = useState(false);
   // metadata
   // fetch les metas et les tags
-  const [tags, setTags] = useState<[metaTag]>([]);
   const [selectedTags, setSelectedTags] = useState<string[]>([]);
 
   const [formData, setFormData] = useState<{
     name: string;
     description: string;
-    tag: string[];
+    tags: string[];
     file: File | null;
   }>({
     name: "",
     description: "",
-    tag: [],
+    tags: [],
     file: null,
   });
   const [preview, setPreview] = useState<string | null>(null); // Stocke l'URL de prévisualisation
 
-  const handleChange = (e) => {
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
     const { name, value } = e.target;
     console.log('ABC handleChange', name, value)
     setFormData((prevData) => ({
@@ -36,11 +59,14 @@ const AddMeta = ({ country }: { country: { code: string; name: string } }) => {
     console.log('ABC handleChange', formData)
   };
 
-  const handleFileChange = (e) => {
+  interface FileChangeEvent extends React.ChangeEvent<HTMLInputElement> {
+    target: HTMLInputElement & { files: FileList };
+  }
+
+  const handleFileChange = (e: FileChangeEvent) => {
     const imageFile = e.target.files[0];
-    const newwImage = renameImage(imageFile)
-    // file.name = "caca" + uuidv4() + ".png"
-    console.log('ABC handleFileChange', imageFile)
+    const newwImage = imageFile ? renameImage(imageFile) : null;
+    console.log('ABC handleFileChange', imageFile);
     setFormData((prevData) => ({
       ...prevData,
       file: newwImage,
@@ -51,21 +77,21 @@ const AddMeta = ({ country }: { country: { code: string; name: string } }) => {
     } else {
       setPreview(null);
     }
-    console.log('ABC handleFileChange', formData)
+    console.log('ABC handleFileChange', formData);
   };
 
-  const onPasteFile = (e) => {
+  const onPasteFile = (e: React.ClipboardEvent<HTMLInputElement>) => {
     const items = e.clipboardData.items;
     const imageFile = items[0].getAsFile()
-    const newwImage = renameImage(imageFile)
+    const newImage = imageFile ? renameImage(imageFile) : null;
     console.log('ABC imageFile', imageFile)
-    if (imageFile?.type.startsWith('image/')) {
-      const t = URL.createObjectURL(newwImage)
+    if (newImage && imageFile?.type.startsWith('image/')) {
+      const t = URL.createObjectURL(newImage)
       setPreview(t);
       // setPreview(imageFile);
       setFormData((d) => ({
         ...d,
-        file: newwImage, // Reset file input since we're using a URL
+        file: newImage, // Reset file input since we're using a URL
       }));
     } else {
       alert("Please paste a valid image URL (jpg, png, jpeg).");
@@ -94,23 +120,24 @@ const AddMeta = ({ country }: { country: { code: string; name: string } }) => {
     if (creatingMeta && formData.file !== null) {
       const res = await createMeta(formData);
       if (!res.error) {
-
+        onMetaAdded();
       }
       console.log('ABC addMetaClick res', res)
       setCreatingMeta(false);
     }
   };
 
-  const onKeyDownTagInput = (e) => {
+  const onKeyDownTagInput = (e: React.KeyboardEvent<HTMLInputElement>) => {
+    console.log('ABC e', e.key)
     if (e.key === "Enter") {
       e.preventDefault(); // Empêche le saut de ligne
-      const newTag = e.target.value.trim();
+      const newTag = (e.target as HTMLInputElement).value.trim();
       if (!selectedTags.includes(newTag)) {
         addTag(newTag).then((res) => {
           console.log("ABC addTag res", res)
           // selectedTags.push(newTag)
           setSelectedTags((prevTags) => [...prevTags, newTag]);
-          formData.tag = []
+          formData.tags = []
         })
       }
       // if (!tags.includes(newTag)) {
@@ -155,10 +182,10 @@ const AddMeta = ({ country }: { country: { code: string; name: string } }) => {
   const createMeta = async (data: {
     name: string;
     description: string;
-    tags: [string];
-    file: File;
+    tags: string[];
+    file: File | null;
   }) => {
-    const imagePath = await uploadImage(data.file);
+    const imagePath = data.file ? await uploadImage(data.file) : null;
     const imageUrl = getPublicUrl(imagePath)
     // const res =  await insertMeta(data, imagePath)
     return await insertMeta(data, imageUrl, selectedTags)
@@ -169,7 +196,7 @@ const AddMeta = ({ country }: { country: { code: string; name: string } }) => {
   const insertMeta = async (metaData: {
     name: string;
     description: string;
-    tags: [string];
+    tags: string[];
   }, imagePath: string | null, selectedTags: string[]) => {
     // envoyer la requete
     return await supabase
@@ -185,7 +212,6 @@ const AddMeta = ({ country }: { country: { code: string; name: string } }) => {
         },
       ])
       .select();
-    console.log('ABC insertMeta response', response)
   };
   return (
     <div className="add-meta-container">
@@ -240,10 +266,10 @@ const AddMeta = ({ country }: { country: { code: string; name: string } }) => {
               />
               <input
                 type="text"
-                value={formData.tag}
+                value={formData.tags}
                 onChange={handleChange}
                 placeholder="Choose tags"
-                name="tag"
+                name="tags"
                 className="meta-tags-input border-none w-1/2 px-3 py-2"
                 onKeyDown={onKeyDownTagInput}
               />

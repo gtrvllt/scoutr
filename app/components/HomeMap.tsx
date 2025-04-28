@@ -1,5 +1,7 @@
 "use client";
 import React, { useState, useEffect } from "react";
+import type { FeatureCollection } from "geojson";
+import type { MapContainerProps } from "react-leaflet";
 import dynamic from "next/dynamic";
 import { useRouter, usePathname } from "next/navigation";
 import Departure from "./home/Departure";
@@ -7,24 +9,13 @@ import "leaflet/dist/leaflet.css";
 import "@/ui/global.css"; // Importez votre fichier CSS global
 
 // Importation dynamique de MapContainer et d'autres composants leaflet
-const MapContainer = dynamic(
-  () => import("react-leaflet").then((mod) => mod.MapContainer),
-  {
-    ssr: false,
-  }
-);
-const TileLayer = dynamic(
-  () => import("react-leaflet").then((mod) => mod.TileLayer),
-  {
-    ssr: false,
-  }
-);
-const GeoJSON = dynamic(
-  () => import("react-leaflet").then((mod) => mod.GeoJSON),
-  {
-    ssr: false,
-  }
-);
+const MapContainer = dynamic(() =>
+  import("react-leaflet").then((mod) => mod.MapContainer), { ssr: false });
+const TileLayer = dynamic(() =>
+  import("react-leaflet").then((mod) => mod.TileLayer), { ssr: false });
+const GeoJSON = dynamic(() =>
+  import("react-leaflet").then((mod) => mod.GeoJSON), { ssr: false });
+
 
 const HomeMap: React.FC = () => {
   const [geojsonData, setGeojsonData] = useState<FeatureCollection | null>(
@@ -41,6 +32,7 @@ const HomeMap: React.FC = () => {
           "https://raw.githubusercontent.com/datasets/geo-boundaries-world-110m/master/countries.geojson"
         );
         const data = await response.json();
+        console.log('ABC data', data)
         setGeojsonData(data);
       } catch (error) {
         console.error(

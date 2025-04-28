@@ -15,7 +15,7 @@ export const CountryList = () => {
 
   const filteredCountries = getFilteredCountries(filter);
 
-  const handleSearch = function (value) {
+  const handleSearch = function (value: string) {
     setFilter(value);
   };
 

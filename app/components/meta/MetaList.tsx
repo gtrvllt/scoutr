@@ -23,7 +23,6 @@ export interface Meta {
 }
 const MetaList = ({ countryCode }: { countryCode: string }) => {
     // const [metas, setMetas] = useState([]);
-    const stickyDivRef = useRef(null);
     const [metas, setMetas] = useState<Meta[]>([]);
     const country = countries.find((c) => c.code === countryCode);
     console.log('ABC country:', country);
@@ -39,7 +38,9 @@ const MetaList = ({ countryCode }: { countryCode: string }) => {
     return (
         <>
             <div className="meta-list">
-                <AddMeta country={country} ref={stickyDivRef}></AddMeta>
+                {country && (
+                    <AddMeta country={{ code: country.code, name: country.name }} onMetaAdded={refreshMetas}></AddMeta>
+                )}
                 <div className="meta-list">
                     {metas?.map((meta) => {
                         return <MetaItem key={meta.id} meta={meta} />;

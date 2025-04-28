@@ -4,7 +4,7 @@ import "@/ui/global.css";
 export interface CountryProps {
   name: string;
   code: string;
-  continent: Record<string, any>;
+  continent: string;
 }
 
 const CountryHeader = ({ country }: { country: CountryProps }) => {

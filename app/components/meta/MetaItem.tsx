@@ -21,13 +21,17 @@ export interface MetaProps {
 const MetaItem = ({ meta }: { meta: MetaProps }) => {
   const [isImageZoomed, setIsImageZoomed] = useState(false);
   let tags: string[] = [];
-  try {
-    // Si meta.tags est un JSON stringifié, parsez-le
-    const parsedTags = JSON.parse(meta.tags);
-    tags = Array.isArray(parsedTags) ? parsedTags : Object.values(parsedTags);
-  } catch (error) {
-    // Si ce n'est pas un JSON valide, utilisez un fallback
-    tags = meta.tags.split(',').map((tag) => tag.trim());
+
+  if (Array.isArray(meta.tags)) {
+    tags = meta.tags;
+  } else if (typeof meta.tags === 'string') {
+    try {
+      const parsed = JSON.parse(meta.tags);
+      tags = Array.isArray(parsed) ? parsed : [meta.tags];
+    } catch {
+      // Si c'est juste une string simple non JSON
+      tags = [meta.tags];
+    }
   }
 
   return (
