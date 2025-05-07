@@ -30,9 +30,15 @@ const AppBar = () => {
             >
               <div className="menu-items flex space-x-4 pl-4">
                 <button className="menu-item">Newsletter</button>
-                <button className="menu-item">About us</button>
-                <button className="menu-item">Donate</button>
-                <button className="menu-item">Terms of use</button>
+                <Link href="/about" className="h-full flex items-stretch">
+                  <button className="menu-item">About us</button>
+                </Link>
+                <Link href="/donate" className="h-full flex items-stretch">
+                  <button className="menu-item">Donate</button>
+                </Link>
+                <Link href="/tos" className="h-full flex items-stretch">
+                  <button className="menu-item">Terms of use</button>
+                </Link>
               </div>
             </motion.div>
           )}
