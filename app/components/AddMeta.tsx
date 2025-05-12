@@ -27,10 +27,10 @@ type AddMetaProps = {
     code: string;
     name: string;
   };
-  onMetaAdded: () => void;
+  onMetaAddedCallBack: () => void;
 };
 
-const AddMeta = ({ country, onMetaAdded }: AddMetaProps) => {
+const AddMeta = ({ country, onMetaAddedCallBack }: AddMetaProps) => {
   const [creatingMeta, setCreatingMeta] = useState(false);
   // metadata
   // fetch les metas et les tags
@@ -51,12 +51,10 @@ const AddMeta = ({ country, onMetaAdded }: AddMetaProps) => {
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
     const { name, value } = e.target;
-    console.log('ABC handleChange', name, value)
     setFormData((prevData) => ({
       ...prevData,
       [name]: value,
     }));
-    console.log('ABC handleChange', formData)
   };
 
   interface FileChangeEvent extends React.ChangeEvent<HTMLInputElement> {
@@ -66,7 +64,6 @@ const AddMeta = ({ country, onMetaAdded }: AddMetaProps) => {
   const handleFileChange = (e: FileChangeEvent) => {
     const imageFile = e.target.files[0];
     const newwImage = imageFile ? renameImage(imageFile) : null;
-    console.log('ABC handleFileChange', imageFile);
     setFormData((prevData) => ({
       ...prevData,
       file: newwImage,
@@ -77,14 +74,12 @@ const AddMeta = ({ country, onMetaAdded }: AddMetaProps) => {
     } else {
       setPreview(null);
     }
-    console.log('ABC handleFileChange', formData);
   };
 
   const onPasteFile = (e: React.ClipboardEvent<HTMLInputElement>) => {
     const items = e.clipboardData.items;
     const imageFile = items[0].getAsFile()
     const newImage = imageFile ? renameImage(imageFile) : null;
-    console.log('ABC imageFile', imageFile)
     if (newImage && imageFile?.type.startsWith('image/')) {
       const t = URL.createObjectURL(newImage)
       setPreview(t);
@@ -113,6 +108,18 @@ const AddMeta = ({ country, onMetaAdded }: AddMetaProps) => {
     return renamedFile;
   };
 
+  const onMetaAdded = () => {
+    onMetaAddedCallBack();
+    // Reset form data and preview
+    setFormData({
+      name: "",
+      description: "",
+      tags: [],
+      file: null,
+    });
+    setPreview(null);
+    setSelectedTags([]);
+  }
   const addMetaClick = async () => {
     // prmier click : ouvrir le formulaire en setant creatingmeta à true
     // deuxieme click : on vérifie que les champs sont remplis et on envoie la requete, puis on ferme le formulaire en setant creatingmeta à false
@@ -122,19 +129,16 @@ const AddMeta = ({ country, onMetaAdded }: AddMetaProps) => {
       if (!res.error) {
         onMetaAdded();
       }
-      console.log('ABC addMetaClick res', res)
       setCreatingMeta(false);
     }
   };
 
   const onKeyDownTagInput = (e: React.KeyboardEvent<HTMLInputElement>) => {
-    console.log('ABC e', e.key)
     if (e.key === "Enter") {
       e.preventDefault(); // Empêche le saut de ligne
       const newTag = (e.target as HTMLInputElement).value.trim();
       if (!selectedTags.includes(newTag)) {
         addTag(newTag).then((res) => {
-          console.log("ABC addTag res", res)
           // selectedTags.push(newTag)
           setSelectedTags((prevTags) => [...prevTags, newTag]);
           formData.tags = []
@@ -170,7 +174,6 @@ const AddMeta = ({ country, onMetaAdded }: AddMetaProps) => {
     const res = supabase.storage
       .from('images')
       .getPublicUrl(imagePath);
-    console.log('ABC getPublicUrl res', res)
     // if (res.error) {
     //   console.error('Erreur lors de la récupération de l\'URL publique :', error);
     //   return null;

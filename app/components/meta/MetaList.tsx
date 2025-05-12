@@ -39,7 +39,7 @@ const MetaList = ({ countryCode }: { countryCode: string }) => {
         <>
             <div className="meta-list">
                 {country && (
-                    <AddMeta country={{ code: country.code, name: country.name }} onMetaAdded={refreshMetas}></AddMeta>
+                    <AddMeta country={{ code: country.code, name: country.name }} onMetaAddedCallBack={refreshMetas}></AddMeta>
                 )}
                 <div className="meta-list">
                     {metas?.map((meta) => {
