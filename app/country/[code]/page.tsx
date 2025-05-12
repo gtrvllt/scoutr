@@ -13,12 +13,10 @@ export default async function CountryPage({
 }) {
   const { code } = await params;
   const country = countries.find((c) => c.code === code);
-  console.log('ABC country:', country);
 
   // Attendre la promesse pour obtenir les données réelles
   const rawMetas = await fetchMetasByCountryCode(code);
   const metas = Array.isArray(rawMetas) ? rawMetas : [];
-  console.log('ABC metas:', metas);
 
   const refreshMetas = async () => {
     console.log('refreshMetas called');

@@ -32,7 +32,6 @@ const HomeMap: React.FC = () => {
           "https://raw.githubusercontent.com/datasets/geo-boundaries-world-110m/master/countries.geojson"
         );
         const data = await response.json();
-        console.log('ABC data', data)
         setGeojsonData(data);
       } catch (error) {
         console.error(
@@ -52,7 +51,6 @@ const HomeMap: React.FC = () => {
   const onEachCountry = (feature: any, layer: any) => {
     layer.on({
       mouseover: () => {
-        console.log("ABC hovering ", feature.properties.name);
         setHoveredCountry(feature.properties.name);
       },
       mouseout: () => {
@@ -60,7 +58,6 @@ const HomeMap: React.FC = () => {
       },
       click: () => {
         // Rediriger vers la page spécifique du pays
-        console.log("ABC click", feature.properties);
         const countryCode = feature.properties.iso_a2;
         router.push(`/country/${countryCode}`);
       },
