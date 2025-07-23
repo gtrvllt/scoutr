@@ -1,6 +1,5 @@
 import { supabase } from '@/lib/supabase';
 import { Meta } from './definitions';
-
 export async function fetchMetas() {
   try {
     const data = await supabase.from('metas').select('*');
@@ -14,7 +13,8 @@ export async function fetchMetas() {
 
 export async function fetchTags() {
   try {
-    const data = await supabase.from('meta-tags').select('*');
+    const data = await supabase.from('meta_tags').select('*');
+    console.log('fetchTags data:', data);
     return data.data;
   } catch (error) {
     console.error('fetchMetas Error:', error);

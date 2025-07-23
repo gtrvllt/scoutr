@@ -1,10 +1,10 @@
 "use client";
 import React, { useState } from "react";
 import { supabase } from "@/lib/supabase";
+import { fetchTags } from "@/lib/data";
 import Image from "next/image";
-import Autocomplete from "@/components/inputs/autocomplete";
-import { fetchTags, addTag } from "@/lib/data";
 import { v4 as uuidv4 } from 'uuid';
+import AsyncCreatableSelect from 'react-select/async-creatable';
 
 export interface MetaTag {
   id: string;
@@ -32,8 +32,6 @@ type AddMetaProps = {
 
 const AddMeta = ({ country, onMetaAddedCallBack }: AddMetaProps) => {
   const [creatingMeta, setCreatingMeta] = useState(false);
-  // metadata
-  // fetch les metas et les tags
   const [selectedTags, setSelectedTags] = useState<string[]>([]);
 
   const [formData, setFormData] = useState<{
@@ -47,7 +45,7 @@ const AddMeta = ({ country, onMetaAddedCallBack }: AddMetaProps) => {
     tags: [],
     file: null,
   });
-  const [preview, setPreview] = useState<string | null>(null); // Stocke l'URL de prévisualisation
+  const [preview, setPreview] = useState<string | null>(null);
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
     const { name, value } = e.target;
@@ -57,20 +55,16 @@ const AddMeta = ({ country, onMetaAddedCallBack }: AddMetaProps) => {
     }));
   };
 
-  interface FileChangeEvent extends React.ChangeEvent<HTMLInputElement> {
-    target: HTMLInputElement & { files: FileList };
-  }
-
-  const handleFileChange = (e: FileChangeEvent) => {
-    const imageFile = e.target.files[0];
-    const newwImage = imageFile ? renameImage(imageFile) : null;
+  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const imageFile = e.target.files?.[0];
+    const newImage = imageFile ? renameImage(imageFile) : null;
     setFormData((prevData) => ({
       ...prevData,
-      file: newwImage,
+      file: newImage,
     }));
 
-    if (newwImage) {
-      setPreview(URL.createObjectURL(newwImage));
+    if (newImage) {
+      setPreview(URL.createObjectURL(newImage));
     } else {
       setPreview(null);
     }
@@ -78,39 +72,31 @@ const AddMeta = ({ country, onMetaAddedCallBack }: AddMetaProps) => {
 
   const onPasteFile = (e: React.ClipboardEvent<HTMLInputElement>) => {
     const items = e.clipboardData.items;
-    const imageFile = items[0].getAsFile()
+    const imageFile = items[0].getAsFile();
     const newImage = imageFile ? renameImage(imageFile) : null;
     if (newImage && imageFile?.type.startsWith('image/')) {
-      const t = URL.createObjectURL(newImage)
+      const t = URL.createObjectURL(newImage);
       setPreview(t);
-      // setPreview(imageFile);
       setFormData((d) => ({
         ...d,
-        file: newImage, // Reset file input since we're using a URL
+        file: newImage,
       }));
     } else {
       alert("Please paste a valid image URL (jpg, png, jpeg).");
     }
-  }
+  };
 
   const renameImage = (imageFile: File) => {
-    // Générer un UUID
     const uniqueId = uuidv4();
-
-    // Créer un nouveau nom de fichier en ajoutant l'UUID au nom original
     const uniqueFileName = `${uniqueId}_${imageFile.name}`;
-
-    // Créer un nouvel objet File avec le nom unique
     const renamedFile = new File([imageFile], uniqueFileName, {
       type: imageFile.type,
     });
-
     return renamedFile;
   };
 
   const onMetaAdded = () => {
     onMetaAddedCallBack();
-    // Reset form data and preview
     setFormData({
       name: "",
       description: "",
@@ -119,10 +105,9 @@ const AddMeta = ({ country, onMetaAddedCallBack }: AddMetaProps) => {
     });
     setPreview(null);
     setSelectedTags([]);
-  }
+  };
+
   const addMetaClick = async () => {
-    // prmier click : ouvrir le formulaire en setant creatingmeta à true
-    // deuxieme click : on vérifie que les champs sont remplis et on envoie la requete, puis on ferme le formulaire en setant creatingmeta à false
     setCreatingMeta(!creatingMeta);
     if (creatingMeta && formData.file !== null) {
       const res = await createMeta(formData);
@@ -133,34 +118,11 @@ const AddMeta = ({ country, onMetaAddedCallBack }: AddMetaProps) => {
     }
   };
 
-  const onKeyDownTagInput = (e: React.KeyboardEvent<HTMLInputElement>) => {
-    if (e.key === "Enter") {
-      e.preventDefault(); // Empêche le saut de ligne
-      const newTag = (e.target as HTMLInputElement).value.trim();
-      if (!selectedTags.includes(newTag)) {
-        addTag(newTag).then((res) => {
-          // selectedTags.push(newTag)
-          setSelectedTags((prevTags) => [...prevTags, newTag]);
-          formData.tags = []
-        })
-      }
-      // if (!tags.includes(newTag)) {
-      //   addTag(newTag).then((res) => {
-      //     console.log("ABC addTag res", res)
-      //     // setTags((prevTags) => [...prevTags, newTag]);
-      //   }
-      // } else {
-      //   alert("Tag already exists");
-      // }
-    }
-  };
-
   const uploadImage = async (file: File) => {
     const sanitizedFileName = file.name.replace(/[^a-zA-Z0-9.]/g, '_');
     const { data, error } = await supabase.storage
       .from("images")
       .upload(`public/${sanitizedFileName}`, file);
-    // todo - gérer le nom du dossier
     if (error) {
       console.error("Erreur lors du téléchargement de l'image :", error);
       return null;
@@ -170,15 +132,9 @@ const AddMeta = ({ country, onMetaAddedCallBack }: AddMetaProps) => {
 
   const getPublicUrl = (imagePath: string | null) => {
     if (!imagePath) return null;
-    // const { publicURL, error } = supabase.storage
     const res = supabase.storage
       .from('images')
       .getPublicUrl(imagePath);
-    // if (res.error) {
-    //   console.error('Erreur lors de la récupération de l\'URL publique :', error);
-    //   return null;
-    // }
-
     return res.data.publicUrl;
   };
 
@@ -189,19 +145,15 @@ const AddMeta = ({ country, onMetaAddedCallBack }: AddMetaProps) => {
     file: File | null;
   }) => {
     const imagePath = data.file ? await uploadImage(data.file) : null;
-    const imageUrl = getPublicUrl(imagePath)
-    // const res =  await insertMeta(data, imagePath)
-    return await insertMeta(data, imageUrl, selectedTags)
-
-  }
-
+    const imageUrl = getPublicUrl(imagePath);
+    return await insertMeta(data, imageUrl, selectedTags);
+  };
 
   const insertMeta = async (metaData: {
     name: string;
     description: string;
     tags: string[];
   }, imagePath: string | null, selectedTags: string[]) => {
-    // envoyer la requete
     return await supabase
       .from("metas")
       .insert([
@@ -209,19 +161,48 @@ const AddMeta = ({ country, onMetaAddedCallBack }: AddMetaProps) => {
           name: metaData.name,
           description: metaData.description,
           tags: selectedTags,
-          user_id: "fb7a25b6-d374-4d91-a658-2d8f4f9c90f1", // current test user
+          user_id: "fb7a25b6-d374-4d91-a658-2d8f4f9c90f1",
           country_code: country.code,
           image_url: imagePath,
         },
       ])
       .select();
   };
+
+  const createTag = async (name: string) => {
+    console.log("Création du tag :", name);
+    const { error } = await supabase
+      .from("meta_tags")
+      .insert({ name });
+
+    if (error) {
+      console.error("Erreur lors de la création du tag :", error);
+      return false;
+    }
+
+    setSelectedTags((prev) => [...prev, name]);
+    return true;
+  };
+
+  const onTagInputChange = (newValue: { label: string; value: string }[]) => {
+    const tags = newValue.map((tag) => tag.value);
+    setSelectedTags(tags);
+  }
+  const loadTags = async (inputValue: string) => {
+    console.log("Chargement des tags avec inputValue :", inputValue);
+    const tags  = await fetchTags();
+    console.log("Chargement des tags :", tags);
+    return tags?.map((tag) => ({
+      label: tag.name,
+      value: tag.name,
+    })) || [];
+  };
+
   return (
     <div className="add-meta-container">
       {creatingMeta && (
         <div className="add-meta-form flex mb-4">
           <div className="image-container p-4">
-            {/* {!formData.file ? ( */}
             {!preview ? (
               <div className="h-full">
                 <div
@@ -234,7 +215,7 @@ const AddMeta = ({ country, onMetaAddedCallBack }: AddMetaProps) => {
                     type="file"
                     name="file"
                     onChange={handleFileChange}
-                    style={{ marginRight: "10px", width: "0", height: "0" }}
+                    style={{ display: "none" }}
                   />
                   <div>Upload your picture</div>
                   <svg width="23" height="23" viewBox="0 0 23 23" fill="none" xmlns="http://www.w3.org/2000/svg">
@@ -248,7 +229,7 @@ const AddMeta = ({ country, onMetaAddedCallBack }: AddMetaProps) => {
                   <input
                     type="text"
                     placeholder="Or paste your image here"
-                    onPaste={(e) => { onPasteFile(e); }}
+                    onPaste={onPasteFile}
                     className="paste-image-input border-none"
                   />
                 </div>
@@ -267,30 +248,31 @@ const AddMeta = ({ country, onMetaAddedCallBack }: AddMetaProps) => {
                 name="name"
                 className="meta-name-input border-none w-1/2 px-3 py-2"
               />
-              <input
-                type="text"
-                value={formData.tags}
-                onChange={handleChange}
-                placeholder="Choose tags"
-                name="tags"
-                className="meta-tags-input border-none w-1/2 px-3 py-2"
-                onKeyDown={onKeyDownTagInput}
-              />
-              {/* <Autocomplete
-                suggestions={["Paris", "Lyon", "Marseille", "Toulouse"]}
-                onSelect={(val) => setFormData({ ...formData, tags: val })}
-                placeholder="Choose a city"
-              /> */}
-              <div className="tags-container flex flex-wrap">
-                {selectedTags.map((tag, index) =>
-                (
+              {/* <div className="tags-container flex flex-wrap w-1/2">
+                {selectedTags.map((tag, index) => (
                   <span key={index} className="tag-item bg-gray-200 rounded-full px-2 py-1 mr-2 mb-2">
                     {tag.trim()}
                   </span>
                 ))}
-              </div>
+              </div> */}
+              <AsyncCreatableSelect
+                isMulti
+                isClearable
+                placeholder="Tags..."
+                value={selectedTags.map((tag) => ({ label: tag, value: tag }))}
+                onChange={onTagInputChange}
+                onCreateOption={(inputValue) => {
+                  const trimmed = inputValue.trim();
+                  if (trimmed && !selectedTags.includes(trimmed)) {
+                    createTag(trimmed);
+                  }
+                }}
+                loadOptions={loadTags}
+                defaultOptions
+                cacheOptions
+                className="w-full"
+              />
             </div>
-
             <textarea
               rows={4}
               value={formData.description}
@@ -299,11 +281,9 @@ const AddMeta = ({ country, onMetaAddedCallBack }: AddMetaProps) => {
               name="description"
               className="meta-description-input border-none w-full resize-none"
             />
-
           </div>
         </div>
       )}
-      {/* bouton ajout meta */}
       <button
         className="add-meta-button group disabled cursor-pointer bg-transparent text-black hover:bg-black hover:text-white transition-all duration-300"
         onClick={addMetaClick}
@@ -322,7 +302,7 @@ const AddMeta = ({ country, onMetaAddedCallBack }: AddMetaProps) => {
           />
         </svg>
       </button>
-    </div >
+    </div>
   );
 };
 
