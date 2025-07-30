@@ -202,7 +202,7 @@ const AddMeta = ({ country, onMetaAddedCallBack }: AddMetaProps) => {
     <div className="add-meta-container">
       {creatingMeta && (
         <div className="add-meta-form flex mb-4">
-          <div className="image-container p-4">
+          <div className="image-container p-4 m-5">
             {!preview ? (
               <div className="h-full">
                 <div
@@ -238,7 +238,7 @@ const AddMeta = ({ country, onMetaAddedCallBack }: AddMetaProps) => {
               <Image src={preview} alt="metaImage" height={200} width={250} className="max-h-full object-cover" />
             )}
           </div>
-          <div className="meta-inputs flex flex-col w-full">
+          <div className="meta-inputs m-5 flex flex-col w-full">
             <div className="flex w-full space-x-2">
               <input
                 type="text"
@@ -256,6 +256,7 @@ const AddMeta = ({ country, onMetaAddedCallBack }: AddMetaProps) => {
                 ))}
               </div> */}
               <AsyncCreatableSelect
+                classNamePrefix="custom-select"
                 isMulti
                 isClearable
                 placeholder="Tags..."
@@ -271,6 +272,7 @@ const AddMeta = ({ country, onMetaAddedCallBack }: AddMetaProps) => {
                 defaultOptions
                 cacheOptions
                 className="w-full"
+                aria-label="tag-selection"
               />
             </div>
             <textarea

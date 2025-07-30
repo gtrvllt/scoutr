@@ -98,7 +98,7 @@ const HomeMap: React.FC = () => {
           data={geojsonData}
           style={(feature) => ({
             fillColor:
-              hoveredCountry === feature?.properties?.name ? "gray" : "white",
+              hoveredCountry === feature?.properties?.name ? "pink" : "#04BCAF",
             weight: 2,
             color: "black",
             fillOpacity:

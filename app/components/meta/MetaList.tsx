@@ -40,6 +40,7 @@ const MetaList = ({ countryCode }: { countryCode: string }) => {
                 {country && (
                     <AddMeta country={{ code: country.code, name: country.name }} onMetaAddedCallBack={refreshMetas}></AddMeta>
                 )}
+                tags
                 <div className="meta-list">
                     {metas?.map((meta) => {
                         return <MetaItem key={meta.id} meta={meta} />;
