@@ -22,11 +22,11 @@ export default function RootLayout({
           crossOrigin=""
         />
         <AppBar />
-        <main className="main-content flex h-full">
-          <aside className="w-1/4 country-list-container">
+        <main className="main-container flex">
+          <div className="country-list-container absolute top-64px left-0 z-50 h-full  backdrop-blur-md shadow-lg ">
             <CountryList />
-          </aside>
-          <div className="flex-1 main-container">{children}</div>
+          </div>
+          <div className="flex-1 main-content">{children}</div>
         </main>
       </body>
     </html>

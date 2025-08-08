@@ -14,7 +14,8 @@ const Departure: React.FC<DepartureProps> = ({ hoveredCountry }) => {
         if (container) {
             const containerWidth = container.offsetWidth;
             const textWidth = container.scrollWidth;
-            const repetitions = Math.ceil(containerWidth / textWidth) + 1;
+            // const repetitions = Math.ceil(containerWidth / textWidth) + 4;
+            const repetitions = 12;
             setRepeatedText(Array(repetitions).fill(country + ' //// ').join(''));
         }
     }, [country]);
