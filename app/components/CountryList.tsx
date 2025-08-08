@@ -24,7 +24,7 @@ export const CountryList = () => {
   return (
     <>
       <div
-        className={`country-list bg-white/80 fixed top-54 left-0 z-50 h-[calc(100vh-54px)] overflow-y-scroll transition-all duration-300 ease-in-out ${
+        className={`country-list bg-white/80 backdrop-blur-md fixed top-54 left-0 z-50 h-[calc(100vh-54px)] overflow-y-scroll transition-all duration-300 ease-in-out ${
           isOpen ? "w-64" : "w-10"
         }`}
       >
@@ -32,7 +32,7 @@ export const CountryList = () => {
         {isOpen && (
           <div className="p-4">
             {/* Search input */}
-            <div className="sticky top-0 z-10 bg-white p-4 pl-0">
+            <div className="sticky backdrop-blur-md top-0 z-10 bg-white p-4 pl-0">
               <input
                 type="search"
                 placeholder="Search a country"
@@ -62,12 +62,24 @@ export const CountryList = () => {
       </div>
       <button
         onClick={toggleSidebar}
-        className="toggle-country-list bg-transparent sticky transition-all duration-300 ease-in-out"
-         style={{
-          left: isOpen ? '276px' : '52px', // 256px (w-64) + 20px ou 40px (w-10) + 12px
+        className="toggle-country-list  bg-transparent sticky transition-all duration-300 ease-in-out"
+        style={{
+          left: isOpen ? "264px" : "12px", // 256px (w-64) + 20px ou 40px (w-10) + 12px
         }}
       >
-        {isOpen ? "<" : ">"}
+        {/* {isOpen ? "<" : ">"} */}
+        <svg
+          width="18"
+          height="31"
+          viewBox="0 0 18 31"
+          fill="none"
+          xmlns="http://www.w3.org/2000/svg"
+          className={`transition-transform duration-200 ${
+            isOpen ? "rotate-180" : ""
+          }`}
+        >
+          <path d="M2 2L15.5 15.5L2 29" stroke="black" strokeWidth="3" />
+        </svg>
       </button>
     </>
   );
