@@ -1,6 +1,7 @@
 "use client";
 
-import React, { useState } from "react";
+import { usePathname } from "next/navigation";
+import React, { useEffect, useState } from "react";
 import Link from "next/link";
 import countries from "@/lib/countries.json";
 import { FiSearch } from "react-icons/fi";
@@ -8,6 +9,13 @@ import { FiSearch } from "react-icons/fi";
 export const CountryList = () => {
   const [filter, setFilter] = useState("");
   const [isOpen, setIsOpen] = useState(true);
+  const pathName = usePathname();
+
+  useEffect(() => {
+    if (pathName.startsWith("/country/")) {
+      setIsOpen(false);
+    }
+  }, [pathName]);
 
   const handleSearch = (value: string) => {
     setFilter(value);
@@ -32,7 +40,7 @@ export const CountryList = () => {
         {isOpen && (
           <div className="p-4">
             {/* Search input */}
-            <div className="sticky backdrop-blur-md top-0 z-10 bg-white p-4 pl-0">
+            <div className="sticky top-0 z-10 bg-white p-4 pl-0">
               <input
                 type="search"
                 placeholder="Search a country"
