@@ -1,10 +1,10 @@
-import countries from "@/lib/countries.json";
 import { fetchMetas, fetchMetasByCountryCode } from "app/lib/data";
 import { supabase } from "@/lib/supabase";
 import MetaItem from "@/components/meta/MetaItem";
 import CountryHeader from "@/components/country/CountryHeader";
 import AddMeta from "@/components/AddMeta";
 import MetaList from "@/components/meta/MetaList";
+import { fetchCountries } from "@/lib/data";
 
 export default async function CountryPage({
   params,
@@ -12,7 +12,11 @@ export default async function CountryPage({
   params: Promise<{ code: string }>;
 }) {
   const { code } = await params;
-  const country = countries.find((c) => c.code === code);
+
+  // Récupérer les pays depuis la table Supabase
+  const countries = await fetchCountries();
+  console.log('Countries fetched:', countries);
+  const country = countries?.find((c) => c.code === code);
 
   // Attendre la promesse pour obtenir les données réelles
   const rawMetas = await fetchMetasByCountryCode(code);

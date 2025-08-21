@@ -25,6 +25,7 @@ const MetaList = ({ countryCode }: { countryCode: string }) => {
     // const [metas, setMetas] = useState([]);
     const [metas, setMetas] = useState<Meta[]>([]);
     const country = countries.find((c) => c.code === countryCode);
+    const countryTags = country ? country.tags : [];
     const refreshMetas = async () => {
         const updated = await fetchMetasByCountryCode(countryCode);
         setMetas(Array.isArray(updated) ? updated : []);

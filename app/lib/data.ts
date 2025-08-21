@@ -11,6 +11,17 @@ export async function fetchMetas() {
   }
 }
 
+export async function fetchCountries() {
+  try {
+    const data = await supabase.from('countries').select('*');
+    console.log('fetchCountries data:', data);
+    return data.data;
+  } catch (error) {
+    console.error('fetchCountries Error:', error);
+    throw new Error('Failed to fetch countries data.');
+  }
+}
+
 export async function fetchTags() {
   try {
     const data = await supabase.from('meta_tags').select('*');
