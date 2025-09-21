@@ -110,6 +110,11 @@ const HomeMap: React.FC = () => {
         center={[20, 0]}
         zoom={2}
         style={{ height: "calc(100% - 30px)", width: "100%" }}
+        maxBounds={[
+          [-85, -180], // Sud-Ouest
+          [85, 180],   // Nord-Est
+        ]}
+        maxBoundsViscosity={1.0}
       >
         <GeoJSON
           data={geojsonData}

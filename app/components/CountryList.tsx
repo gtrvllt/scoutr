@@ -29,12 +29,18 @@ export const CountryList = () => {
     setIsOpen((prev) => !prev);
   };
 
+  const handleClick = () => {
+    if (!isOpen) {
+      setIsOpen(true);
+    }
+  };
+
   return (
     <>
       <div
-        className={`country-list bg-white/80 backdrop-blur-md fixed top-54 left-0 z-50 h-[calc(100vh-54px)] overflow-y-scroll transition-all duration-300 ease-in-out ${
-          isOpen ? "w-64" : "w-10"
-        }`}
+        className={`country-list bg-white/80 backdrop-blur-md fixed top-54 left-0 z-50 h-[calc(100vh-54px)] overflow-y-scroll transition-all duration-300 ease-in-out ${isOpen ? "w-64" : "w-10 cursor-pointer"
+          }`}
+        onClick={handleClick}
       >
         {/* Content visible only when open */}
         {isOpen && (
@@ -82,9 +88,8 @@ export const CountryList = () => {
           viewBox="0 0 18 31"
           fill="none"
           xmlns="http://www.w3.org/2000/svg"
-          className={`transition-transform duration-200 ${
-            isOpen ? "rotate-180" : ""
-          }`}
+          className={`transition-transform duration-200 ${isOpen ? "rotate-180" : ""
+            }`}
         >
           <path d="M2 2L15.5 15.5L2 29" stroke="black" strokeWidth="3" />
         </svg>

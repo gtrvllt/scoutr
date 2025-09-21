@@ -173,7 +173,7 @@ const AddMeta = ({ country, onMetaAddedCallBack }: AddMetaProps) => {
     console.log("Création du tag :", name);
     const { error } = await supabase
       .from("meta_tags")
-      .insert({ name });
+      .insert({ name, country_code: country.code, created_at: new Date() });
 
     if (error) {
       console.error("Erreur lors de la création du tag :", error);
