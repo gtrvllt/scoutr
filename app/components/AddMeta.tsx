@@ -190,7 +190,7 @@ const AddMeta = ({ country, onMetaAddedCallBack }: AddMetaProps) => {
   }
   const loadTags = async (inputValue: string) => {
     console.log("Chargement des tags avec inputValue :", inputValue);
-    const tags  = await fetchTags();
+    const tags = await fetchTags();
     console.log("Chargement des tags :", tags);
     return tags?.map((tag) => ({
       label: tag.name,
@@ -289,20 +289,50 @@ const AddMeta = ({ country, onMetaAddedCallBack }: AddMetaProps) => {
       <button
         className="add-meta-button group disabled cursor-pointer bg-transparent text-black hover:bg-black hover:text-white transition-all duration-300"
         onClick={addMetaClick}
-        disabled={creatingMeta && (!formData.name || !formData.description || !formData.file)}>
-        Add a meta
-        <svg
-          width="21"
-          height="20"
-          viewBox="0 0 21 20"
-          xmlns="http://www.w3.org/2000/svg"
-          className="ml-2 text-black group-hover:text-white transition-all duration-300"
-        >
-          <path
-            d="M10.5 0C4.989 0 0.5 4.489 0.5 10C0.5 15.511 4.989 20 10.5 20C16.011 20 20.5 15.511 20.5 10C20.5 4.489 16.011 0 10.5 0ZM10.5 2C14.9301 2 18.5 5.56988 18.5 10C18.5 14.4301 14.9301 18 10.5 18C6.06988 18 2.5 14.4301 2.5 10C2.5 5.56988 6.06988 2 10.5 2ZM9.5 5V9H5.5V11H9.5V15H11.5V11H15.5V9H11.5V5H9.5Z"
-            fill="currentColor"
-          />
-        </svg>
+        disabled={creatingMeta && (!formData.name || !formData.description || !formData.file)}
+      >
+        {creatingMeta ? "Add the meta" : "Add a meta"}
+        {creatingMeta ? (
+          // Icône check dans un cercle
+          <svg
+            width="21"
+            height="20"
+            viewBox="0 0 21 20"
+            xmlns="http://www.w3.org/2000/svg"
+            className="ml-2 text-black group-hover:text-white transition-all duration-300"
+          >
+            <circle
+              cx="10.5"
+              cy="10"
+              r="9"
+              stroke="currentColor"
+              strokeWidth="2"
+              fill="none"
+            />
+            <path
+              d="M6.5 10.5L9.5 13.5L15 8"
+              stroke="currentColor"
+              strokeWidth="2"
+              fill="none"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+            />
+          </svg>
+        ) : (
+          // Icône +
+          <svg
+            width="21"
+            height="20"
+            viewBox="0 0 21 20"
+            xmlns="http://www.w3.org/2000/svg"
+            className="ml-2 text-black group-hover:text-white transition-all duration-300"
+          >
+            <path
+              d="M10.5 0C4.989 0 0.5 4.489 0.5 10C0.5 15.511 4.989 20 10.5 20C16.011 20 20.5 15.511 20.5 10C20.5 4.489 16.011 0 10.5 0ZM10.5 2C14.9301 2 18.5 5.56988 18.5 10C18.5 14.4301 14.9301 18 10.5 18C6.06988 18 2.5 14.4301 2.5 10C2.5 5.56988 6.06988 2 10.5 2ZM9.5 5V9H5.5V11H9.5V15H11.5V11H15.5V9H11.5V5H9.5Z"
+              fill="currentColor"
+            />
+          </svg>
+        )}
       </button>
     </div>
   );

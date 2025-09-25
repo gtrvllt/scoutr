@@ -17,6 +17,12 @@ export const CountryList = () => {
     }
   }, [pathName]);
 
+  useEffect(() => {
+    if (!isOpen) {
+      setFilter("");
+    }
+  }, [isOpen]);
+
   const handleSearch = (value: string) => {
     setFilter(value);
   };
@@ -38,8 +44,8 @@ export const CountryList = () => {
   return (
     <>
       <div
-        className={`country-list bg-white/80 backdrop-blur-md fixed top-54 left-0 z-50 h-[calc(100vh-54px)] overflow-y-scroll transition-all duration-300 ease-in-out ${isOpen ? "w-64" : "w-10 cursor-pointer"
-          }`}
+        className={`country-list bg-white/80 backdrop-blur-md fixed left-0 z-50 h-[calc(100vh-54px)] overflow-y-scroll transition-all duration-300 ease-in-out ${isOpen ? "w-64" : "w-10 cursor-pointer"} ${!isOpen ? "group" : ""}`}
+        style={{ overflow: 'visible' }}
         onClick={handleClick}
       >
         {/* Content visible only when open */}
@@ -73,27 +79,30 @@ export const CountryList = () => {
             </div>
           </div>
         )}
-      </div>
-      <button
-        onClick={toggleSidebar}
-        className="toggle-country-list  bg-transparent sticky transition-all duration-300 ease-in-out"
-        style={{
-          left: isOpen ? "264px" : "12px", // 256px (w-64) + 20px ou 40px (w-10) + 12px
-        }}
-      >
-        {/* {isOpen ? "<" : ">"} */}
-        <svg
-          width="18"
-          height="31"
-          viewBox="0 0 18 31"
-          fill="none"
-          xmlns="http://www.w3.org/2000/svg"
-          className={`transition-transform duration-200 ${isOpen ? "rotate-180" : ""
-            }`}
+        <button
+          onClick={toggleSidebar}
+          className="toggle-country-list bg-transparent transition-all duration-300 ease-in-out"
+          style={{
+            position: 'absolute',
+            top: '50%',
+            left: isOpen ? "264px" : "12px",
+            transform: 'translateY(-50%)',
+            zIndex: 100,
+            pointerEvents: 'auto',
+          }}
         >
-          <path d="M2 2L15.5 15.5L2 29" stroke="black" strokeWidth="3" />
-        </svg>
-      </button>
+          <svg
+            width="18"
+            height="31"
+            viewBox="0 0 18 31"
+            fill="none"
+            xmlns="http://www.w3.org/2000/svg"
+            className={`transition-transform duration-300 ${isOpen ? "rotate-180" : ""} ${!isOpen ? "group-hover:scale-125" : ""}`}
+          >
+            <path d="M2 2L15.5 15.5L2 29" stroke="black" strokeWidth="3" />
+          </svg>
+        </button>
+      </div>
     </>
   );
 };
