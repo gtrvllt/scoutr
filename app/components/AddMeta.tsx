@@ -5,6 +5,7 @@ import { fetchTags } from "@/lib/data";
 import Image from "next/image";
 import { v4 as uuidv4 } from 'uuid';
 import AsyncCreatableSelect from 'react-select/async-creatable';
+import type { MultiValue, ActionMeta } from "react-select";
 
 export interface MetaTag {
   id: string;
@@ -184,18 +185,26 @@ const AddMeta = ({ country, onMetaAddedCallBack }: AddMetaProps) => {
     return true;
   };
 
-  const onTagInputChange = (newValue: { label: string; value: string }[]) => {
+  const onTagInputChange = (
+    newValue: MultiValue<{ label: string; value: string }>,
+    actionMeta: ActionMeta<{ label: string; value: string }>
+  ) => {
     const tags = newValue.map((tag) => tag.value);
     setSelectedTags(tags);
-  }
+  };
+
   const loadTags = async (inputValue: string) => {
     console.log("Chargement des tags avec inputValue :", inputValue);
     const tags = await fetchTags();
     console.log("Chargement des tags :", tags);
-    return tags?.map((tag) => ({
-      label: tag.name,
-      value: tag.name,
-    })) || [];
+    return (
+      tags?.filter(tag =>
+        tag.name.toLowerCase().includes(inputValue.toLowerCase())
+      ).map((tag) => ({
+        label: tag.name,
+        value: tag.name,
+      })) || []
+    );
   };
 
   return (
