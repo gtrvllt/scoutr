@@ -2,6 +2,7 @@ import "@/ui/global.css";
 
 import ClientAppBar from "@/components/ClientAppBar";
 import ClientCountryList from "@/components/ClientCountryList";
+import { SpeedInsights } from "@vercel/speed-insights/next";
 // import dynamic from 'next/dynamic';
 // const AppBar = dynamic(() => import('@/components/AppBar'), { ssr: false });
 // const CountryList = dynamic(() => import('@/components/CountryList'), { ssr: false });
@@ -27,6 +28,7 @@ export default function RootLayout({
           </div>
           <div className="flex-1 main-content">{children}</div>
         </main>
+            <SpeedInsights />
       </body>
     </html>
   );
