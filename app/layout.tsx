@@ -28,7 +28,7 @@ export default function RootLayout({
           </div>
           <div className="flex-1 main-content">{children}</div>
         </main>
-            <SpeedInsights />
+        <SpeedInsights />
       </body>
     </html>
   );
