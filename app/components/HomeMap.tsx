@@ -63,7 +63,7 @@ const HomeMap: React.FC = () => {
     const loadCountries = async () => {
       try {
         const fetchedCountries = await fetchCountries();
-        setCountries(fetchedCountries); // Mettre à jour l'état avec les pays
+        setCountries(fetchedCountries || []); 
         // Appeler fetchData uniquement si countries est chargé
         await fetchData();
       } catch (error) {
