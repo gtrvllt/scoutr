@@ -42,10 +42,10 @@ export const CountryList = () => {
   };
 
   return (
-    <>
+    <div className={`${!isOpen ? "group" : ""}`}>
       <div
-        className={`country-list bg-white/80 backdrop-blur-md fixed left-0 z-50 h-[calc(100vh-54px)] overflow-y-scroll transition-all duration-300 ease-in-out ${isOpen ? "w-64" : "w-10 cursor-pointer"} ${!isOpen ? "group" : ""}`}
-        style={{ overflow: 'visible' }}
+        className={`country-list bg-white/80 backdrop-blur-md fixed left-0 z-50 h-[calc(100vh-54px)] overflow-y-scroll transition-all duration-300 ease-in-out ${isOpen ? "w-64" : "w-10 cursor-pointer"} `}
+        style={{ overflowY: 'scroll' }}
         onClick={handleClick}
       >
         {/* Content visible only when open */}
@@ -79,30 +79,31 @@ export const CountryList = () => {
             </div>
           </div>
         )}
-        <button
-          onClick={toggleSidebar}
-          className="toggle-country-list bg-transparent transition-all duration-300 ease-in-out"
-          style={{
-            position: 'absolute',
-            top: '50%',
-            left: isOpen ? "264px" : "12px",
-            transform: 'translateY(-50%)',
-            zIndex: 100,
-            pointerEvents: 'auto',
-          }}
-        >
-          <svg
-            width="18"
-            height="31"
-            viewBox="0 0 18 31"
-            fill="none"
-            xmlns="http://www.w3.org/2000/svg"
-            className={`transition-transform duration-300 ${isOpen ? "rotate-180" : ""} ${!isOpen ? "group-hover:scale-125" : ""}`}
-          >
-            <path d="M2 2L15.5 15.5L2 29" stroke="black" strokeWidth="3" />
-          </svg>
-        </button>
+
       </div>
-    </>
+      <button
+        onClick={toggleSidebar}
+        className="toggle-country-list bg-transparent transition-all duration-300 ease-in-out"
+        style={{
+          position: 'absolute',
+          top: '50%',
+          left: isOpen ? "264px" : "12px",
+          transform: 'translateY(-50%)',
+          zIndex: 100,
+          pointerEvents: 'auto',
+        }}
+      >
+        <svg
+          width="18"
+          height="31"
+          viewBox="0 0 18 31"
+          fill="none"
+          xmlns="http://www.w3.org/2000/svg"
+          className={`transition-transform duration-300 ${isOpen ? "rotate-180" : ""} ${!isOpen ? "group-hover:scale-125" : ""}`}
+        >
+          <path d="M2 2L15.5 15.5L2 29" stroke="black" strokeWidth="3" />
+        </svg>
+      </button>
+    </div>
   );
 };
