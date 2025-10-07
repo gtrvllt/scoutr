@@ -29,7 +29,9 @@ const AppBar = () => {
               transition={{ duration: 0.3 }}
             >
               <div className="menu-items flex space-x-4 pl-4">
-                <button className="menu-item">Newsletter</button>
+                <Link href="/newsletter" className="h-full flex items-stretch">
+                  <button className="menu-item">Newsletter</button>
+                </Link>
                 <Link href="/about" className="h-full flex items-stretch">
                   <button className="menu-item">About us</button>
                 </Link>
