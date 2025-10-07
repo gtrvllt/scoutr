@@ -8,6 +8,7 @@ import Departure from "./home/Departure";
 import "leaflet/dist/leaflet.css";
 import "@/ui/global.css"; // Importez votre fichier CSS global
 import { fetchCountries } from "@/lib/data";
+import { useCountryListStore } from "@/store/countryListStore";
 
 // Importation dynamique de MapContainer et d'autres composants leaflet
 const MapContainer = dynamic(() =>
@@ -78,12 +79,14 @@ const HomeMap: React.FC = () => {
     // Code dépendant du routeur
   }, [pathname]);
 
+  const setIsOpen = useCountryListStore((state) => state.setIsOpen);
   const onEachCountry = (feature: any, layer: any) => {
     layer.on({
       mouseover: () => setHoveredCountry(feature.properties.name),
       mouseout: () => setHoveredCountry(null),
       click: () => {
         const countryCode = feature.properties.iso_a2;
+        setIsOpen(false);
         router.push(`/country/${countryCode}`);
       },
     });

@@ -70,6 +70,7 @@ export const CountryList = () => {
                     <Link
                       href={`/country/${country.code}`}
                       className="block p-1 text-gray-900 hover:bg-gray-900 hover:text-white transition"
+                      onClick={() => setIsOpen(false)}
                     >
                       {country.name}
                     </Link>
