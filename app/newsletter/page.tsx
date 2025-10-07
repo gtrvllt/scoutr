@@ -16,6 +16,7 @@ export default function AboutPage() {
             <li>Amélioration de la world map </li>
             <li>Amélioration de l'ajout de méta</li>
             <li>Amélioration de l'ajout de méta-tag</li>
+            <li>Fermeture de la country-list au clic d'un pays</li>
           </ul>
           <h3 className="text-xl font-semibold text-gray-800">Nouveaux ajouts</h3>
           <ul className="list-disc pl-6 mt-2 text-gray-700">
