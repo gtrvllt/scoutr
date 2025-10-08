@@ -79,14 +79,14 @@ const HomeMap: React.FC = () => {
     // Code dépendant du routeur
   }, [pathname]);
 
-  const setIsOpen = useCountryListStore((state) => state.setIsOpen);
+  const setIsCountryListOpen = useCountryListStore((state) => state.setIsCountryListOpen);
   const onEachCountry = (feature: any, layer: any) => {
     layer.on({
       mouseover: () => setHoveredCountry(feature.properties.name),
       mouseout: () => setHoveredCountry(null),
       click: () => {
         const countryCode = feature.properties.iso_a2;
-        setIsOpen(false);
+        setIsCountryListOpen(false);
         router.push(`/country/${countryCode}`);
       },
     });

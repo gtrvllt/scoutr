@@ -9,22 +9,22 @@ import { FiSearch } from "react-icons/fi";
 
 export const CountryList = () => {
   const [filter, setFilter] = React.useState("");
-  const isOpen = useCountryListStore((state) => state.isOpen);
-  const setIsOpen = useCountryListStore((state) => state.setIsOpen);
+  const isCountryListOpen = useCountryListStore((state) => state.isCountryListOpen);
+  const setIsCountryListOpen = useCountryListStore((state) => state.setIsCountryListOpen);
   const toggleSidebar = useCountryListStore((state) => state.toggle);
   const pathName = usePathname();
 
   useEffect(() => {
     if (pathName.startsWith("/country/")) {
-      setIsOpen(false);
+      setIsCountryListOpen(false);
     }
-  }, [pathName, setIsOpen]);
+  }, [pathName, setIsCountryListOpen]);
 
   useEffect(() => {
-    if (!isOpen) {
+    if (!isCountryListOpen) {
       setFilter("");
     }
-  }, [isOpen]);
+  }, [isCountryListOpen]);
 
   const handleSearch = (value: string) => {
     setFilter(value);
@@ -36,20 +36,20 @@ export const CountryList = () => {
 
 
   const handleClick = () => {
-    if (!isOpen) {
-      setIsOpen(true);
+    if (!isCountryListOpen) {
+      setIsCountryListOpen(true);
     }
   };
 
   return (
-    <div className={`${!isOpen ? "group" : ""}`}>
+    <div className={`${!isCountryListOpen ? "group" : ""}`}>
       <div
-        className={`country-list bg-white/80 backdrop-blur-md fixed left-0 z-50 h-[calc(100vh-54px)] overflow-y-scroll transition-all duration-300 ease-in-out ${isOpen ? "w-64" : "w-10 cursor-pointer"} `}
+        className={`country-list bg-white/80 backdrop-blur-md fixed left-0 z-50 h-[calc(100vh-54px)] overflow-y-scroll transition-all duration-300 ease-in-out ${isCountryListOpen ? "w-64" : "w-10 cursor-pointer"} `}
         style={{ overflowY: 'scroll' }}
         onClick={handleClick}
       >
         {/* Content visible only when open */}
-        {isOpen && (
+        {isCountryListOpen && (
           <div className="p-4">
             {/* Search input */}
             <div className="sticky top-0 z-10 bg-white p-4 pl-0">
@@ -70,7 +70,7 @@ export const CountryList = () => {
                     <Link
                       href={`/country/${country.code}`}
                       className="block p-1 text-gray-900 hover:bg-gray-900 hover:text-white transition"
-                      onClick={() => setIsOpen(false)}
+                      onClick={() => setIsCountryListOpen(false)}
                     >
                       {country.name}
                     </Link>
@@ -88,7 +88,7 @@ export const CountryList = () => {
         style={{
           position: 'absolute',
           top: '50%',
-          left: isOpen ? "264px" : "12px",
+          left: isCountryListOpen ? "264px" : "12px",
           transform: 'translateY(-50%)',
           zIndex: 100,
           pointerEvents: 'auto',
@@ -100,7 +100,7 @@ export const CountryList = () => {
           viewBox="0 0 18 31"
           fill="none"
           xmlns="http://www.w3.org/2000/svg"
-          className={`transition-transform duration-300 ${isOpen ? "rotate-180" : ""} ${!isOpen ? "group-hover:scale-125" : ""}`}
+          className={`transition-transform duration-300 ${isCountryListOpen ? "rotate-180" : ""} ${!isCountryListOpen ? "group-hover:scale-125" : ""}`}
         >
           <path d="M2 2L15.5 15.5L2 29" stroke="black" strokeWidth="3" />
         </svg>

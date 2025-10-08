@@ -1,13 +1,22 @@
 import { create } from 'zustand';
 
 interface CountryListState {
-  isOpen: boolean;
-  setIsOpen: (open: boolean) => void;
-  toggle: () => void;
+    isCountryListOpen: boolean;
+    setIsCountryListOpen: (open: boolean) => void;
+    toggle: () => void;
 }
 
 export const useCountryListStore = create<CountryListState>((set) => ({
-  isOpen: true,
-  setIsOpen: (open) => set({ isOpen: open }),
-  toggle: () => set((state) => ({ isOpen: !state.isOpen })),
+    isCountryListOpen: true,
+    setIsCountryListOpen: (open) => {
+        console.log('isCountryListOpen set to:', open);
+        set({ isCountryListOpen: open });
+    },
+    toggle: () => {
+        set((state) => {
+            const newState = { isCountryListOpen: !state.isCountryListOpen };
+            console.log('isCountryListOpen toggled to:', newState.isCountryListOpen);
+            return newState;
+        });
+    },
 }));

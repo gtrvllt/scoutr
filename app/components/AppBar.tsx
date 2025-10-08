@@ -1,6 +1,7 @@
 "use client";
 import React, { useState } from "react";
 import Link from "next/link";
+import { useCountryListStore } from "@/store/countryListStore";
 import Logo from "@/ui/logo.svg";
 import Image from "next/image";
 import { motion, AnimatePresence } from "framer-motion";
@@ -14,6 +15,15 @@ const AppBar = () => {
   const toggleMenu = () => {
     setIsOpen(!isOpen);
   };
+
+
+  // Store country list state
+  const setCountryListOpen = useCountryListStore((state) => state.setIsCountryListOpen);
+
+  // Handler pour fermer la country list au clic sur un lien
+  const handleNavClick = () => { setCountryListOpen(false); setIsOpen(false); };
+  // const isCountryListOpen = useCountryListStore((state) => state.setIsOpen);
+  // const toggleCountryList = useCountryListStore((state) => state.toggle);
 
   return (
     <header className="fixed top-0text-white px-4 flex items-center justify-center justify-between appbar fixed w-full">
@@ -29,16 +39,16 @@ const AppBar = () => {
               transition={{ duration: 0.3 }}
             >
               <div className="menu-items flex space-x-4 pl-4">
-                <Link href="/newsletter" className="h-full flex items-stretch">
+                <Link href="/newsletter" className="h-full flex items-stretch" onClick={handleNavClick}>
                   <button className="menu-item">Newsletter</button>
                 </Link>
-                <Link href="/about" className="h-full flex items-stretch">
+                <Link href="/about" className="h-full flex items-stretch" onClick={handleNavClick}>
                   <button className="menu-item">About us</button>
                 </Link>
-                <Link href="/donate" className="h-full flex items-stretch">
+                <Link href="/donate" className="h-full flex items-stretch" onClick={handleNavClick}>
                   <button className="menu-item">Donate</button>
                 </Link>
-                <Link href="/tos" className="h-full flex items-stretch">
+                <Link href="/tos" className="h-full flex items-stretch" onClick={handleNavClick}>
                   <button className="menu-item">Terms of use</button>
                 </Link>
               </div>

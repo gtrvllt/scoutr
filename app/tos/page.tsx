@@ -1,6 +1,6 @@
 export default function TosPage() {
   return (
-  <div className="py-12 px-6 overflow-y-auto">
+    <div className="pt-12 px-6">
       <h1 className="text-3xl font-bold mb-4 text-gray-900">Terms of Use & Mentions légales</h1>
       <p className="font-bold mt-6 mb-2">Définitions</p>
       <p><b>Client :</b> tout professionnel ou personne physique capable au sens des articles 1123 et suivants du Code civil, ou personne morale, qui visite le Site objet des présentes conditions générales.</p>
