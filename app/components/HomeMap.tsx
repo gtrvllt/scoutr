@@ -16,6 +16,8 @@ const HomeMap: React.FC = () => {
   const mapContainerRef = useRef<HTMLDivElement | null>(null);
   const mapRef = useRef<mapboxgl.Map | null>(null);
   const hoveredFeatureIdRef = useRef<number | string | null>(null);
+  const lastHoveredNameRef = useRef<string | null>(null);
+  const rafRef = useRef<number | null>(null);
 
   const router = useRouter();
   const pathname = usePathname();
@@ -74,10 +76,11 @@ const HomeMap: React.FC = () => {
       style: "mapbox://styles/mapbox/light-v11",
       center: [0, 20],
       zoom: 2,
-      maxBounds: [
-        [-180, -85], // Sud-Ouest [lng, lat]
-        [180, 85], // Nord-Est
-      ],
+      renderWorldCopies: true, // valeur par défaut; explicitée pour clarté
+      // maxBounds: [
+      //   [-180, -85], // Sud-Ouest [lng, lat]
+      //   [180, 85], // Nord-Est
+      // ],
     });
 
     mapRef.current = map;
@@ -116,27 +119,39 @@ const HomeMap: React.FC = () => {
       });
 
       // Interactions
-      map.on("mousemove", "countries-fill", (e: any) => {
-        const feature = e.features?.[0];
-        if (!feature) return;
+      // Throttle hover updates via rAF and avoid no-op updates
+      const onMouseMove = (e: any) => {
+        if (rafRef.current) return;
+        rafRef.current = requestAnimationFrame(() => {
+          rafRef.current = null;
+          const feature = e.features?.[0];
+          if (!feature) return;
 
-        // Mettre à jour nom survolé
-        setHoveredCountry(feature?.properties?.name ?? null);
+          const name = feature?.properties?.name ?? null;
+          if (lastHoveredNameRef.current !== name) {
+            lastHoveredNameRef.current = name;
+            setHoveredCountry(name);
+          }
 
-        // Mettre à jour état de survol pour le rendu
-        if (hoveredFeatureIdRef.current !== null) {
-          map.setFeatureState(
-            { source: "countries", id: hoveredFeatureIdRef.current },
-            { hover: false }
-          );
-        }
-        hoveredFeatureIdRef.current = feature.id;
-        if (feature.id !== undefined) {
-          map.setFeatureState({ source: "countries", id: feature.id }, { hover: true });
-        }
+          const newId = feature.id;
+          const prevId = hoveredFeatureIdRef.current;
+          if (newId !== prevId) {
+            if (prevId !== null && prevId !== undefined) {
+              map.setFeatureState(
+                { source: "countries", id: prevId },
+                { hover: false }
+              );
+            }
+            hoveredFeatureIdRef.current = newId;
+            if (newId !== undefined && newId !== null) {
+              map.setFeatureState({ source: "countries", id: newId }, { hover: true });
+            }
+          }
 
-        map.getCanvas().style.cursor = "pointer";
-      });
+          map.getCanvas().style.cursor = "pointer";
+        });
+      };
+      map.on("mousemove", "countries-fill", onMouseMove);
 
       map.on("mouseleave", "countries-fill", () => {
         if (hoveredFeatureIdRef.current !== null) {
@@ -147,6 +162,7 @@ const HomeMap: React.FC = () => {
         }
         hoveredFeatureIdRef.current = null;
         setHoveredCountry(null);
+        lastHoveredNameRef.current = null;
         map.getCanvas().style.cursor = "";
       });
 
@@ -162,6 +178,11 @@ const HomeMap: React.FC = () => {
 
     return () => {
       if (mapRef.current) {
+        // Cleanup any pending rAF from mousemove throttling
+        if (rafRef.current !== null) {
+          try { cancelAnimationFrame(rafRef.current); } catch {}
+          rafRef.current = null;
+        }
         mapRef.current.remove();
         mapRef.current = null;
       }
