@@ -67,13 +67,13 @@ const MetaList = ({ countryCode }: { countryCode: string }) => {
                     <AddMeta country={{ code: country.code, name: country.name }} onMetaAddedCallBack={refreshMetas}></AddMeta>
                 )}
 
-                <div className="tags-container">
+                <div className="tags-container mt-6">
                     {countryTags.map((tag, index) => {
                         const isSelected = selectedTags.includes(tag.name);
                         return (
                             <button
                                 key={index}
-                                className={`meta-tag px-2 py-1 rounded mr-2 transition ${isSelected ? " font-bold" : ""
+                                className={`meta-tag px-2 py-1 border border-black rounded-none mr-2 transition bg-transparent ${isSelected ? " font-bold" : ""
                                     }`}
                                 onClick={() => {
                                     setSelectedTags(prev =>

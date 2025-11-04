@@ -71,12 +71,28 @@ const HomeMap: React.FC = () => {
       console.error("Mapbox access token manquant. Définissez NEXT_PUBLIC_MAPBOX_TOKEN.");
     }
 
+    // Astuce économies: possibilité de n'utiliser AUCUN fond de carte Mapbox
+    // en définissant NEXT_PUBLIC_MAPBOX_NO_BASEMAP=true (on affiche seulement notre GeoJSON)
+    const styleOrEmpty =
+      process.env.NEXT_PUBLIC_MAPBOX_NO_BASEMAP === "true"
+        ? ({ version: 8, sources: {}, layers: [] } as any)
+        : ("mapbox://styles/mapbox/light-v11" as any);
+
     const map = new mapboxgl.Map({
       container: mapContainerRef.current,
-      style: "mapbox://styles/mapbox/light-v11",
+      style: styleOrEmpty,
       center: [0, 20],
       zoom: 2,
-      renderWorldCopies: true, // valeur par défaut; explicitée pour clarté
+      // Moins de tuiles chargées car pas de répétition du monde
+      renderWorldCopies: false,
+      // Réduit les scénarios d'exploration coûteux
+      minZoom: 1.2,
+      maxZoom: 5,
+      // Gestes coopératifs = moins de zoom involontaire
+      cooperativeGestures: true,
+      // Évite certains téléchargements de glyphes CJK
+      localIdeographFontFamily: "sans-serif",
+      // Pas de maxBounds horizontales pour ne pas bloquer le scroll latéral
       // maxBounds: [
       //   [-180, -85], // Sud-Ouest [lng, lat]
       //   [180, 85], // Nord-Est
@@ -86,6 +102,18 @@ const HomeMap: React.FC = () => {
     mapRef.current = map;
 
     map.on("load", () => {
+      // Désactiver la prélecture de tuiles pour économiser des requêtes
+      (map as any).setPrefetchZoomDelta?.(0);
+
+  // Interactions: garder le zoom mais éviter la rotation (qui peut charger d'autres tuiles)
+  map.scrollZoom.enable();
+  map.doubleClickZoom.enable();
+  map.boxZoom.enable();
+  map.keyboard.enable();
+  map.dragRotate.disable();
+  map.touchZoomRotate.enable();
+  (map.touchZoomRotate as any).disableRotation?.();
+
       // Source GeoJSON avec IDs générés pour feature-state
       map.addSource("countries", {
         type: "geojson",
@@ -118,7 +146,7 @@ const HomeMap: React.FC = () => {
         paint: { "line-color": "#000000", "line-width": 1.5 },
       });
 
-      // Interactions
+  // Interactions
       // Throttle hover updates via rAF and avoid no-op updates
       const onMouseMove = (e: any) => {
         if (rafRef.current) return;
@@ -174,6 +202,27 @@ const HomeMap: React.FC = () => {
           router.push(`/country/${code}`);
         }
       });
+
+      // Pan « infini » contrôlé sans duplication du monde:
+      // - Recentrage discret sur moveend si on s'approche de ±180° (±360° wrap)
+      // - Garde de réentrance pour éviter toute boucle; clamp vertical pour les pôles
+      const clamp = (v: number, min: number, max: number) => Math.max(min, Math.min(max, v));
+      let isRecentering = false;
+      const onMoveEnd = () => {
+        if (isRecentering) { isRecentering = false; return; }
+        const c = map.getCenter();
+        let lng = c.lng;
+        let lat = clamp(c.lat, -85, 85);
+        const threshold = 175; // recaler un peu avant la dateline
+        let jumped = false;
+        if (lng > threshold) { lng -= 360; jumped = true; }
+        else if (lng < -threshold) { lng += 360; jumped = true; }
+        if (jumped || lat !== c.lat) {
+          isRecentering = true;
+          map.jumpTo({ center: [lng, lat], zoom: map.getZoom(), bearing: 0, pitch: 0 });
+        }
+      };
+      map.on("moveend", onMoveEnd);
     });
 
     return () => {

@@ -85,13 +85,11 @@ input[type="number"]::-webkit-outer-spin-button {
 
 /* map */
 
-
-
 /* page country */
 
 .country-page-content {
   padding-left: 50px;
-  padding-right: 30px;
+  padding-right: 130px;
 }
 
 .country-header {
@@ -178,7 +176,6 @@ input[type="number"]::-webkit-outer-spin-button {
 
 .add-meta-container {
   border: 2px solid #000000;
-  margin-bottom: 15px;
 }
 
 .add-meta-button {
@@ -203,12 +200,4 @@ input[type="number"]::-webkit-outer-spin-button {
   height: 200px;
   width: 300px;
   border: 2px solid #000000;
-}
-
-/* composant meta tag */
-.meta-tag {
-  background-color: #f0f0f0;
-  border-radius: 4px;
-  padding: 4px 8px;
-  margin-right: 8px;
 }

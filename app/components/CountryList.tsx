@@ -1,14 +1,14 @@
 "use client";
 
 import { usePathname } from "next/navigation";
-import React, { useEffect } from "react";
+import React, { useEffect, useState } from "react";
 import Link from "next/link";
 import countries from "@/lib/countries.json";
 import { useCountryListStore } from "@/store/countryListStore";
 import { FiSearch } from "react-icons/fi";
 
 export const CountryList = () => {
-  const [filter, setFilter] = React.useState("");
+  const [filter, setFilter] = useState("");
   const isCountryListOpen = useCountryListStore((state) => state.isCountryListOpen);
   const setIsCountryListOpen = useCountryListStore((state) => state.setIsCountryListOpen);
   const toggleSidebar = useCountryListStore((state) => state.toggle);

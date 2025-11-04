@@ -24,15 +24,15 @@ export interface MetaTag {
 }
 
 type AddMetaProps = {
-  country: {
+  country?: {
     code: string;
     name: string;
-  };
+  } | null;
   onMetaAddedCallBack: () => void;
 };
 
 const AddMeta = ({ country, onMetaAddedCallBack }: AddMetaProps) => {
-  const [creatingMeta, setCreatingMeta] = useState(false);
+  const [creatingMeta, setCreatingMeta] = useState(() => !country); 
   const [selectedTags, setSelectedTags] = useState<string[]>([]);
 
   const [formData, setFormData] = useState<{
@@ -47,6 +47,11 @@ const AddMeta = ({ country, onMetaAddedCallBack }: AddMetaProps) => {
     file: null,
   });
   const [preview, setPreview] = useState<string | null>(null);
+
+  // Open the form if country is null (also reacts if it becomes null later)
+  React.useEffect(() => {
+    if (!country) setCreatingMeta(true);
+  }, [country]);
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
     const { name, value } = e.target;
@@ -111,6 +116,10 @@ const AddMeta = ({ country, onMetaAddedCallBack }: AddMetaProps) => {
   const addMetaClick = async () => {
     setCreatingMeta(!creatingMeta);
     if (creatingMeta && formData.file !== null) {
+      if (!country) {
+        console.error("No country selected; cannot submit meta.");
+        return;
+      }
       const res = await createMeta(formData);
       if (!res.error) {
         onMetaAdded();
@@ -147,14 +156,14 @@ const AddMeta = ({ country, onMetaAddedCallBack }: AddMetaProps) => {
   }) => {
     const imagePath = data.file ? await uploadImage(data.file) : null;
     const imageUrl = getPublicUrl(imagePath);
-    return await insertMeta(data, imageUrl, selectedTags);
+    return await insertMeta(data, imageUrl, selectedTags, country?.code ?? null);
   };
 
   const insertMeta = async (metaData: {
     name: string;
     description: string;
     tags: string[];
-  }, imagePath: string | null, selectedTags: string[]) => {
+  }, imagePath: string | null, selectedTags: string[], countryCode: string | null) => {
     return await supabase
       .from("metas")
       .insert([
@@ -163,7 +172,7 @@ const AddMeta = ({ country, onMetaAddedCallBack }: AddMetaProps) => {
           description: metaData.description,
           tags: selectedTags,
           user_id: "fb7a25b6-d374-4d91-a658-2d8f4f9c90f1",
-          country_code: country.code,
+          country_code: countryCode,
           image_url: imagePath,
         },
       ])
@@ -172,6 +181,10 @@ const AddMeta = ({ country, onMetaAddedCallBack }: AddMetaProps) => {
 
   const createTag = async (name: string) => {
     console.log("Création du tag :", name);
+    if (!country) {
+      console.error("No country selected; cannot create tag.");
+      return false;
+    }
     const { error } = await supabase
       .from("meta_tags")
       .insert({ name, country_code: country.code, created_at: new Date() });
@@ -210,7 +223,7 @@ const AddMeta = ({ country, onMetaAddedCallBack }: AddMetaProps) => {
   return (
     <div className="add-meta-container">
       {creatingMeta && (
-        <div className="add-meta-form flex mb-4">
+        <div className="add-meta-form flex">
           <div className="image-container p-4 m-5">
             {!preview ? (
               <div className="h-full">
@@ -298,7 +311,7 @@ const AddMeta = ({ country, onMetaAddedCallBack }: AddMetaProps) => {
       <button
         className="add-meta-button group disabled cursor-pointer bg-transparent text-black hover:bg-black hover:text-white transition-all duration-300"
         onClick={addMetaClick}
-        disabled={creatingMeta && (!formData.name || !formData.description || !formData.file)}
+        disabled={creatingMeta && (!formData.name || !formData.description || !formData.file || !country)}
       >
         {creatingMeta ? "Add the meta" : "Add a meta"}
         {creatingMeta ? (
