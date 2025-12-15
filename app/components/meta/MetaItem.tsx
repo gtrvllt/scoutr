@@ -1,6 +1,6 @@
 "use client";
 import "@/ui/global.css";
-import { useState } from "react";
+import { useMemo, useState } from "react";
 import { supabase } from "@/lib/supabase";
 import { fetchTags } from "@/lib/data";
 import { v4 as uuidv4 } from "uuid";
@@ -33,6 +33,18 @@ const MetaItem = ({ meta }: { meta: MetaProps }) => {
     if (!s) return s;
     return s.charAt(0).toLocaleUpperCase() + s.slice(1);
   };
+
+  const countryFlag = useMemo(() => {
+    const code = meta.country_code?.trim();
+    if (!code || code.length !== 2) return null;
+    const upper = code.toUpperCase();
+    const cp = Array.from(upper).map((c) => 127397 + c.charCodeAt(0));
+    try {
+      return String.fromCodePoint(...cp);
+    } catch {
+      return null;
+    }
+  }, [meta.country_code]);
 
   const [isImageZoomed, setIsImageZoomed] = useState(false);
   const [isEditing, setIsEditing] = useState(false);
@@ -290,7 +302,10 @@ const MetaItem = ({ meta }: { meta: MetaProps }) => {
           <>
             {/* Header: title left, actions right */}
             <div className="meta-header flex items-center justify-between mb-1">
-              <h2 className="text-xl font-bold pr-5 truncate">{capitalizeFirst(currentMeta.name)}</h2>
+              <h2 className="text-xl font-bold pr-5 truncate">
+                {countryFlag && <span className="mr-2">{countryFlag}</span>}
+                {capitalizeFirst(currentMeta.name)}
+              </h2>
               <div className="flex items-center gap-2">
                 <button
                   type="button"
