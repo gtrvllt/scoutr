@@ -1,12 +1,14 @@
 "use client";
 import "@/ui/global.css";
 import { useMemo, useState } from "react";
+import countries from "@/lib/countries.json";
 import { supabase } from "@/lib/supabase";
 import { fetchTags } from "@/lib/data";
 import { v4 as uuidv4 } from "uuid";
 import AsyncCreatableSelect from "react-select/async-creatable";
 import type { MultiValue, ActionMeta } from "react-select";
 import Image from "next/image";
+import { usePathname } from "next/navigation";
 import EditIcon from "@/ui/icons/edit.svg";
 import TrashIcon from "@/ui/icons/trash.svg";
 import EditHoverIcon from "@/ui/icons/editHover.svg";
@@ -33,9 +35,19 @@ const MetaItem = ({ meta }: { meta: MetaProps }) => {
     if (!s) return s;
     return s.charAt(0).toLocaleUpperCase() + s.slice(1);
   };
+  const pathname = usePathname();
+  const showFlag = pathname === "/all-metas";
 
+  
+
+  const [isImageZoomed, setIsImageZoomed] = useState(false);
+  const [isEditing, setIsEditing] = useState(false);
+  const [isDeleted, setIsDeleted] = useState(false);
+  const [isEditHover, setIsEditHover] = useState(false);
+  const [isTrashHover, setIsTrashHover] = useState(false);
+  const [currentMeta, setCurrentMeta] = useState<MetaProps>(meta);
   const countryFlag = useMemo(() => {
-    const code = meta.country_code?.trim();
+    const code = currentMeta.country_code?.trim();
     if (!code || code.length !== 2) return null;
     const upper = code.toUpperCase();
     const cp = Array.from(upper).map((c) => 127397 + c.charCodeAt(0));
@@ -44,14 +56,16 @@ const MetaItem = ({ meta }: { meta: MetaProps }) => {
     } catch {
       return null;
     }
-  }, [meta.country_code]);
+  }, [currentMeta.country_code]);
 
-  const [isImageZoomed, setIsImageZoomed] = useState(false);
-  const [isEditing, setIsEditing] = useState(false);
-  const [isDeleted, setIsDeleted] = useState(false);
-  const [isEditHover, setIsEditHover] = useState(false);
-  const [isTrashHover, setIsTrashHover] = useState(false);
-  const [currentMeta, setCurrentMeta] = useState<MetaProps>(meta);
+  const countryName = useMemo(() => {
+    const code = currentMeta.country_code?.trim()?.toUpperCase();
+    if (!code) return null;
+    const match = (countries as Array<{ name: string; code: string }>).find(
+      (c) => c.code === code
+    );
+    return match?.name ?? null;
+  }, [currentMeta.country_code]);
   let tags: string[] = [];
 
   if (Array.isArray(meta.tags)) {
@@ -302,9 +316,24 @@ const MetaItem = ({ meta }: { meta: MetaProps }) => {
           <>
             {/* Header: title left, actions right */}
             <div className="meta-header flex items-center justify-between mb-1">
-              <h2 className="text-xl font-bold pr-5 truncate">
-                {countryFlag && <span className="mr-2">{countryFlag}</span>}
-                {capitalizeFirst(currentMeta.name)}
+              <h2 className="text-xl font-bold pr-5 flex items-center gap-2 min-w-0">
+                {showFlag && countryFlag && (
+                  <span className="mr-2 relative inline-flex items-center group">
+                    <span
+                      title={countryName ?? currentMeta.country_code ?? undefined}
+                      aria-label={countryName ?? currentMeta.country_code ?? undefined}
+                    >
+                      {countryFlag}
+                    </span>
+                    <span
+                      className="pointer-events-none absolute -top-7 left-1/2 -translate-x-1/2 whitespace-nowrap rounded bg-black px-2 py-1 text-xs text-white opacity-0 shadow z-20 group-hover:opacity-100 transition-opacity"
+                      role="tooltip"
+                    >
+                      {countryName ?? currentMeta.country_code}
+                    </span>
+                  </span>
+                )}
+                <span className="truncate">{capitalizeFirst(currentMeta.name)}</span>
               </h2>
               <div className="flex items-center gap-2">
                 <button
