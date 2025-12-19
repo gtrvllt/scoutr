@@ -7,6 +7,7 @@ import Image from "next/image";
 import { motion, AnimatePresence } from "framer-motion";
 // import { useState } from 'react';
 import BurgerMenu from "./BurgerMenu";
+import UserButton from "./UserButton";
 import "@/ui/global.css";
 import { usePathname } from "next/navigation";
 import countries from "@/lib/countries.json";
@@ -91,9 +92,10 @@ const AppBar = () => {
             Add Meta
           </button>
         </div>
-        <div className="absolute right-4">
+        <div className="absolute right-4 flex items-center gap-3">
+          <UserButton />
           <Link href="/">
-            <Image src={Logo} alt="Logo" className="h-8 w-auto"></Image>
+            <Image src={Logo} alt="Logo" className="h-8 w-auto" />
           </Link>
         </div>
       </div>
@@ -152,7 +154,7 @@ const AppBar = () => {
         )}
       </AnimatePresence>
 
-      {/* <UserButton></UserButton> */}
+      {/* Right-side user button added above near the logo */}
       {/* {menuOpen && <BurgerMenu />} */}
     </header>
   );
