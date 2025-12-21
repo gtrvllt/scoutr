@@ -1,3 +1,5 @@
+@import "tailwindcss";
+
 @font-face {
   font-family: 'Brockmann';
   src: url('../fonts/brockmann-regular-webfont.ttf') format('truetype');
