@@ -66,6 +66,19 @@ Le projet est organisé selon les conventions Nuxt 3, avec une séparation clair
  - **Réflexion proactive** : les agents doivent proposer des améliorations, anticiper les effets secondaires et suggérer des étapes d'implémentation sans attendre des demandes supplémentaires.
  - **Contexte de travail** : toutes les modifications, tests et expérimentations doivent être réalisées dans le dossier ~/nuxt-project pour assurer cohérence et traçabilité.
 
+## 7. Conventions de structure des fichiers `.vue`
+
+Pour assurer une cohérence visuelle et faciliter les revues de code, tous les fichiers Vue du projet doivent respecter l'ordre suivant des blocs SFC :
+
+- Première balise : `<template>` — markup et structure visuelle.
+- Deuxième balise : `<script setup lang="ts">` — logique du composant en Composition API et TypeScript.
+- Troisième balise (optionnelle) : `<style>` ou `<style scoped>` — styles CSS/SCSS.
+
+Règles complémentaires :
+- Gardez l'ordre strictement comme ci‑dessus dans tous les nouveaux composants et lors des refactorings.
+- Évitez d'imbriquer ou de répartir ces blocs ; chaque fichier doit contenir au plus un bloc de chaque type dans cet ordre.
+- Cette convention facilite l'auto‑import, les outils de formatage et la relecture des PRs.
+
 ---
 
 *Document généré automatiquement le 24/12/2025.*
