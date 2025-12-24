@@ -2,7 +2,7 @@ import { createClient, type SupabaseClient } from '@supabase/supabase-js'
 
 let client: SupabaseClient | null = null
 
-export const useSupabaseClient = () => {
+export const useSupabaseClient = (): SupabaseClient => {
   if (client) return client
 
   const config = useRuntimeConfig()

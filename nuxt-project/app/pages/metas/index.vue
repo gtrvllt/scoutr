@@ -17,7 +17,7 @@
     </div>
 </template>
 <script setup lang="ts">
-import { useSupabaseClient } from '@/lib/supabase'
+import { useSupabaseClient } from '~/lib/supabase.client'
 
 const supabase = useSupabaseClient()
 

@@ -1,23 +1,17 @@
 <template>
-    <article
-        class="meta-item flex w-full items-stretch gap-8  p-6 cursor-pointer"
-        @mouseenter="isMetaHovered = true"
-        @mouseleave="isMetaHovered = false"
-    >
+    <article class="meta-item flex w-full items-stretch gap-8 bg-white p-6 text-black cursor-pointer my-2"
+        :class="isMetaHovered ? 'shadow-sm' : ''" @mouseenter="isMetaHovered = true" @mouseleave="isMetaHovered = false"
+        @click="openFocus">
         <div :class="[
             'image-frame flex items-center justify-center border-2 border-black bg-[#d7cfce] overflow-hidden'
         ]">
-            <img :src="meta.image_url" :alt="`${resolvedTitle} image`" class="h-full w-full object-cover" />
+            <img :src="meta.image_url" :alt="`${resolvedTitle} image`" class="h-full w-full object-cover" loading="lazy"/>
         </div>
         <div class="flex w-full flex-col gap-3">
             <div class="flex items-start justify-between gap-4">
                 <h3 class="text-[25px] font-semibold leading-[1.2]">{{ resolvedTitle }}</h3>
                 <div class="flex items-center gap-2">
-                    <button v-for="action in actions" :key="action.label" type="button" :aria-label="action.label"
-                        class="flex h-6 w-6 items-center justify-center transition-opacity hover:opacity-75"
-                        @mouseenter="action.isHovered = true" @mouseleave="action.isHovered = false">
-                        <img :src="getIcon(action)" alt="" class="h-full w-full" />
-                    </button>
+                    <PictoRow :actions="visibleActions" />
                 </div>
             </div>
             <p class="text-[16px] leading-[1.2] whitespace-pre-line">
@@ -25,13 +19,51 @@
             </p>
         </div>
     </article>
+
+    <Teleport to="body">
+        <transition name="meta-focus">
+            <div v-if="isFocused" class="meta-focus-overlay" role="dialog" aria-modal="true"
+                :aria-label="`${resolvedTitle} details`" @click.self="closeFocus">
+                <div class="meta-focus-card">
+                    <!-- <button type="button" class="meta-focus-close" @click="closeFocus" aria-label="Fermer">
+                        <UIcon name="i-lucide-x" class="h-6 w-6" />
+                    </button> -->
+                    <div class="meta-focus-body">
+                        <div class="meta-focus-header">
+                            <h2 class="meta-focus-title">{{ resolvedTitle }}</h2>
+                            <div class="meta-focus-actions">
+                                <div v-for="action in actions">
+                                    <button v-if="action.showOnFocus" :key="`${action.label}-focus`" type="button"
+                                        :aria-label="action.label" class="meta-focus-action">
+                                        <img :src="action.hoverIcon" alt="" />
+                                    </button>
+                                </div>
+                                <button type="button" class="" @click="closeFocus" aria-label="Fermer">
+                                    <UIcon name="i-lucide-x" class="cursor-pointer size-7" />
+                                </button>
+                            </div>
+                        </div>
+                        <div class="meta-focus-media">
+                            <img :src="meta.image_url" :alt="`${resolvedTitle} image`" />
+                        </div>
+                        <p class="meta-focus-description">{{ meta.description || '' }}</p>
+                    </div>
+                </div>
+            </div>
+        </transition>
+    </Teleport>
 </template>
 
 <script setup lang="ts">
-import { computed, ref } from 'vue'
+import { Teleport, computed, ref } from 'vue'
 import type { Meta } from '@/types/meta'
 
 const props = defineProps<{ meta: Meta }>()
+
+// auth helper to know if actions should be visible
+import { useAuthStore } from '~/stores/auth'
+const authStore = useAuthStore()
+const isLogged = computed(() => authStore.isLogged)
 
 ///// gestion des icones d'actions
 import expandIcon from '@/assets/icons/expand.svg'
@@ -41,6 +73,7 @@ import editIcon from '@/assets/icons/edit.svg'
 import hoverEditIcon from '@/assets/icons/editing.svg'
 import trashIcon from '@/assets/icons/trash.svg'
 import hoverTrashIcon from '@/assets/icons/trashOpen.svg'
+import PictoRow from './PictoRow.vue'
 
 
 type Action = {
@@ -48,14 +81,35 @@ type Action = {
     label: string
     isHovered: boolean
     hoverIcon: string
+    showOnFocus: boolean
+    action: () => void
+    disabled?: boolean
 }
 
+const isFocused = ref(false)
+const openFocus = () => {
+    isFocused.value = true
+}
+
+const onEditMeta = () => {
+    console.log('Edit meta', props.meta.id)
+}
+const onDeleteMeta = () => {
+    console.log('Delete meta', props.meta.id)
+}
 const actions = reactive<Action[]>([
-    { icon: expandIcon, label: 'Expand meta details', isHovered: false, hoverIcon: hoverExpandIcon },
-    { icon: dragIcon, label: 'Close meta preview', isHovered: false, hoverIcon: dragIcon },
-    { icon: editIcon, label: 'Edit meta', isHovered: false, hoverIcon: hoverEditIcon },
-    { icon: trashIcon, label: 'Delete meta', isHovered: false, hoverIcon: hoverTrashIcon },
+    { icon: expandIcon, action: openFocus, label: 'Expand meta details', isHovered: false, hoverIcon: hoverExpandIcon, showOnFocus: false },
+    // { icon: dragIcon, label: 'Close meta preview', isHovered: false, hoverIcon: dragIcon, showOnFocus: false },
+    { icon: editIcon, action: onEditMeta, label: 'Edit meta', isHovered: false, hoverIcon: hoverEditIcon, showOnFocus: true },
+    { icon: trashIcon, action: onDeleteMeta, label: 'Delete meta', isHovered: false, hoverIcon: hoverTrashIcon, showOnFocus: true },
 ])
+
+const visibleActions = computed(() => {
+    return actions.map(a => ({
+        ...a,
+        disabled: !isLogged.value && (a.label === 'Edit meta' || a.label === 'Delete meta')
+    }))
+})
 
 const isMetaHovered = ref(false)
 
@@ -64,6 +118,11 @@ const getIcon = (action: Action) => {
         ? action.isHovered || isMetaHovered.value
         : action.isHovered
     return shouldHover ? action.hoverIcon : action.icon
+}
+
+
+const closeFocus = () => {
+    isFocused.value = false
 }
 ///// gestion du titre à afficher
 const resolvedTitle = computed(() => props.meta.title || props.meta.name || 'Meta')
@@ -89,5 +148,118 @@ const resolvedTitle = computed(() => props.meta.title || props.meta.name || 'Met
         width: 339px;
         height: 214px;
     }
+}
+
+.meta-focus-overlay {
+    position: fixed;
+    inset: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background-color: rgba(0, 0, 0, 0.5);
+    backdrop-filter: blur(10px);
+    padding: 24px;
+    z-index: 1000;
+}
+
+.meta-focus-card {
+    position: relative;
+    max-width: 960px;
+    width: 100%;
+    max-height: 90vh;
+    background-color: #ffffff;
+    border: 2px solid #000000;
+    display: flex;
+    flex-direction: column;
+    padding: 32px;
+    overflow: hidden;
+}
+
+.meta-focus-close {
+    position: absolute;
+    top: 16px;
+    right: 16px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    padding: 4px;
+    border: 2px solid #000000;
+    background-color: #ffffff;
+    cursor: pointer;
+}
+
+.meta-focus-body {
+    display: flex;
+    flex-direction: column;
+    gap: 24px;
+    height: 100%;
+    overflow: hidden;
+}
+
+.meta-focus-header {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 16px;
+}
+
+.meta-focus-media {
+    flex: 1 1 auto;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border: 2px solid #000000;
+    background-color: #d7cfce;
+    overflow: hidden;
+    min-height: 360px;
+}
+
+.meta-focus-media img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.meta-focus-title {
+    font-size: 32px;
+    font-weight: 700;
+    line-height: 1.1;
+}
+
+.meta-focus-description {
+    font-size: 18px;
+    line-height: 1.4;
+    white-space: pre-line;
+    overflow-y: auto;
+    padding-right: 8px;
+}
+
+.meta-focus-actions {
+    display: flex;
+    gap: 12px;
+}
+
+.meta-focus-action {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    /* border: 2px solid #000000; */
+    /* background-color: #ffffff; */
+    cursor: pointer;
+}
+
+.meta-focus-action img {
+    width: 25px;
+    height: 25px;
+}
+
+.meta-focus-enter-active,
+.meta-focus-leave-active {
+    transition: opacity 0.2s ease;
+}
+
+.meta-focus-enter-from,
+.meta-focus-leave-to {
+    opacity: 0;
 }
 </style>
