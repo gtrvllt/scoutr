@@ -2,7 +2,7 @@
     <div class="scoutr-app main-content">
         <AppBar />
         <slot />
-        <LoginDialog :isOpen="authStore.isLoginOpen" />
+        <LoginDialog v-model:isOpen="authStore.isLoginOpen" />
     </div>
 </template>
 <script setup lang="ts">

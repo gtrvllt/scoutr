@@ -1,14 +1,15 @@
 <template>
-    <UModal v-model:open="open">
+    <UModal v-model:open="open" :modal="true" aria-labelledby="login-dialog-title">
         <template #header>
             <div class="flex items-center justify-between w-full">
+                <span id="login-dialog-title" class="sr-only">{{ title }}</span>
                 <h2 class="text-2xl font-bold">{{ title }}</h2>
                 <UButton @click="onclose" icon="i-lucide-x" color="neutral" variant="ghost" />
             </div>
         </template>
 
         <template #body>
-            <div class="max-w-md">
+            <div class="">
                 <div v-if="mode === 'login'">
                     <label class="block mb-2">Email</label>
                     <input v-model="email" type="email" class="w-full p-2 border rounded mb-3" />
@@ -70,7 +71,10 @@ const authStore = useAuthStore()
 
 const open = computed({
     get: () => props.isOpen,
-    set: (v: boolean) => emit('update:isOpen', v),
+    set: (v: boolean) => {
+        // emit for v-model consumers — parent/store will be updated by v-model binding
+        emit('update:isOpen', v)
+    },
 })
 
 const onclose = () => {
