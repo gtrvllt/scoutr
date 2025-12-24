@@ -1,5 +1,5 @@
 <template>
-    <div class="scoutr-app main-content">
+    <div class="scoutr-app main-content h-full">
         <AppBar />
         <slot />
         <LoginDialog v-model:isOpen="authStore.isLoginOpen" />

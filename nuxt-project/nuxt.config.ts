@@ -4,6 +4,7 @@ import tailwindcss from '@tailwindcss/vite'
 export default defineNuxtConfig({
   css: [
     '~/assets/css/main.css',
+    'mapbox-gl/dist/mapbox-gl.css',
   ],
 
   components: [
@@ -40,6 +41,7 @@ export default defineNuxtConfig({
     public: {
       SUPABASE_URL: process.env.NUXT_PUBLIC_SUPABASE_URL,
       SUPABASE_ANON_KEY: process.env.NUXT_PUBLIC_SUPABASE_ANON_KEY,
+      NUXT_PUBLIC_MAPBOX_TOKEN: process.env.NUXT_PUBLIC_MAPBOX_TOKEN,
     },
     SUPABASE_SERVICE_ROLE_KEY: process.env.SUPABASE_SERVICE_ROLE_KEY,
   },

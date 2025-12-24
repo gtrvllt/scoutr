@@ -1,7 +1,7 @@
 <template>
   <UApp>
     <NuxtLayout>
-      <NuxtPage />
+      <NuxtPage class="h-full"/>
     </NuxtLayout>
     <NuxtRouteAnnouncer />
   </UApp>

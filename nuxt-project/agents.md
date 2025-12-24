@@ -57,7 +57,9 @@ Le projet est organisé selon les conventions Nuxt 3, avec une séparation clair
  - Documenter davantage les stores et composables pour faciliter l’onboarding.
  - Ajouter des tests unitaires pour les agents critiques (auth, Metas).
  - Utiliser des dossiers pour regrouper les composables par domaine métier.
- - Vérifier l'auto-import de Nuxt avant d'ajouter des imports explicites : Nuxt auto‑importe les API Vue (ex. `ref`, `computed`, `watch`, `defineProps`, etc.) et certains helpers, ce qui réduit les imports manuels et évite les erreurs de duplication.
+ - Vérifier l'auto-import de Nuxt avant d'ajouter des imports explicites : Nuxt auto‑importe un grand nombre d'API Vue et helpers Nuxt (par exemple `ref`, `computed`, `watch`, `onMounted`, `onBeforeUnmount`, `defineProps`, `defineEmits`, `useRouter`, `useRoute`, `useRuntimeConfig`, `useFetch`, etc.).
+	 - Règle pratique : n'ajoutez des imports manuels que si l'éditeur, le linter ou la compilation les réclament explicitement. Évitez les imports redondants pour les APIs auto‑importées et pour les composants déclarés dans les répertoires pris en charge par la configuration `components`.
+	 - Exceptions : importez explicitement les fonctions ou modules tiers (ex. `mapbox-gl`, `@supabase/supabase-js`) et les utilitaires locaux qui ne sont pas auto‑importés (ex. `~/app/lib/supabase.client`, composables non exposés).
 
 ## 6. Principes de réflexion
  - **First principles** : les agents doivent systématiquement décomposer les problèmes jusqu'aux principes fondamentaux, remettre en question les hypothèses et reconstruire des solutions simples et vérifiables.
