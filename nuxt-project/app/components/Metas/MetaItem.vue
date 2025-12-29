@@ -9,7 +9,23 @@
         </div>
         <div class="flex w-full flex-col gap-3">
             <div class="flex items-start justify-between gap-4">
-                <h3 class="text-[25px] font-semibold leading-[1.2]">{{ resolvedTitle }}</h3>
+                <h3 class="text-[25px] font-semibold leading-[1.2] flex items-center gap-3">
+                    <span v-if="countryFlag">
+                        <NuxtLink v-if="countryLink" :to="countryLink" class="flag-wrapper mr-2 relative inline-flex items-center group" @click.stop>
+                            <span class="country-flag" :aria-label="countryName || props.meta.country_code">{{ countryFlag }}</span>
+                            <span class="flag-tooltip pointer-events-none absolute -top-7 left-1/2 -translate-x-1/2 whitespace-nowrap rounded bg-black px-2 py-1 text-xs text-white opacity-0 shadow z-20 group-hover:opacity-100 transition-opacity" role="tooltip">
+                                {{ countryName || props.meta.country_code }}
+                            </span>
+                        </NuxtLink>
+                        <span v-else class="flag-wrapper mr-2 relative inline-flex items-center group">
+                            <span class="country-flag" :aria-label="countryName || props.meta.country_code">{{ countryFlag }}</span>
+                            <span class="flag-tooltip pointer-events-none absolute -top-7 left-1/2 -translate-x-1/2 whitespace-nowrap rounded bg-black px-2 py-1 text-xs text-white opacity-0 shadow z-20 group-hover:opacity-100 transition-opacity" role="tooltip">
+                                {{ countryName || props.meta.country_code }}
+                            </span>
+                        </span>
+                    </span>
+                    {{ resolvedTitle }}
+                </h3>
                 <div class="flex items-center gap-2">
                     <PictoRow :actions="visibleActions" />
                 </div>
@@ -126,6 +142,44 @@ const closeFocus = () => {
 }
 ///// gestion du titre à afficher
 const resolvedTitle = computed(() => props.meta.title || props.meta.name || 'Meta')
+
+// computed country flag (emoji) from 2-letter country code
+const countryFlag = computed(() => {
+    const code = props.meta.country_code?.trim()
+    if (!code || code.length !== 2) return null
+    const upper = code.toUpperCase()
+    const cp = Array.from(upper).map(c => 127397 + c.charCodeAt(0))
+    try {
+        return String.fromCodePoint(...cp)
+    } catch {
+        return null
+    }
+})
+
+// try to resolve country name for tooltip (uses Intl if available)
+const countryName = computed(() => {
+    const code = props.meta.country_code?.trim()?.toUpperCase()
+    if (!code) return null
+    try {
+        // Intl.DisplayNames may not be available in all environments
+        // fallback to the raw code if not
+        // @ts-ignore
+        if (typeof Intl !== 'undefined' && (Intl as any).DisplayNames) {
+            // @ts-ignore
+            return new Intl.DisplayNames(['en'], { type: 'region' }).of(code)
+        }
+    } catch (e) {
+        // ignore
+    }
+    return null
+})
+
+// link to country page (assumes route /country/:code)
+const countryLink = computed(() => {
+    const code = props.meta.country_code?.trim()?.toLowerCase()
+    if (!code) return null
+    return `/country/${code}`
+})
 </script>
 
 <style scoped>
@@ -232,6 +286,18 @@ const resolvedTitle = computed(() => props.meta.title || props.meta.name || 'Met
     white-space: pre-line;
     overflow-y: auto;
     padding-right: 8px;
+}
+
+.country-flag {
+    font-size: 22px;
+    line-height: 1;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.flag-wrapper {
+    cursor: pointer;
 }
 
 .meta-focus-actions {
