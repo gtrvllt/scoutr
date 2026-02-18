@@ -46,5 +46,5 @@ export default defineNuxtConfig({
     SUPABASE_SERVICE_ROLE_KEY: process.env.SUPABASE_SERVICE_ROLE_KEY,
   },
 
-  modules: ['@nuxt/ui', '@nuxt/icon', '@pinia/nuxt'],
+  modules: ['@nuxt/ui', '@nuxt/icon', '@pinia/nuxt', 'motion-v/nuxt'],
 })

@@ -48,7 +48,7 @@
                         <div class="meta-focus-header">
                             <h2 class="meta-focus-title">{{ resolvedTitle }}</h2>
                             <div class="meta-focus-actions">
-                                <div v-for="action in actions">
+                                <!-- <div v-for="action in actions">
                                     <button v-if="action.showOnFocus" :key="`${action.label}-focus`" type="button"
                                         :aria-label="action.label" class="meta-focus-action">
                                         <img :src="action.hoverIcon" alt="" />
@@ -56,8 +56,9 @@
                                 </div>
                                 <button type="button" class="" @click="closeFocus" aria-label="Fermer">
                                     <UIcon name="i-lucide-x" class="cursor-pointer size-7" />
-                                </button>
-                            </div>
+                                </button> -->
+                            <PictoRow :actions="visibleActions" />
+                                                    </div>
                         </div>
                         <div class="meta-focus-media">
                             <img :src="meta.image_url" :alt="`${resolvedTitle} image`" />
@@ -294,6 +295,7 @@ const countryLink = computed(() => {
     display: inline-flex;
     align-items: center;
     justify-content: center;
+    font-family: 'Segoe UI Emoji', 'Apple Color Emoji', 'Noto Color Emoji', 'Twemoji', 'sans-serif';
 }
 
 .flag-wrapper {
