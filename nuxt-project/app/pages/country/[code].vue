@@ -1,12 +1,46 @@
 <template>
-  <div class="p-4">
-    <h1 class="text-2xl font-semibold">Country: {{ $route.params.code }}</h1>
-    <p class="mt-2">This dynamic country page renders for code: {{ $route.params.code }}</p>
-  </div>
+  <section class="space-y-10 pb-16">
+    <div v-if="pending" class="text-sm text-neutral-500">Chargement du pays…</div>
+    <p v-else-if="error" class="text-sm text-rose-600">{{ error.data?.statusMessage || error.message }}</p>
+    <div v-else-if="country" class="space-y-10">
+      <CountryHeader :country="country" />
+      <MetaList :country="{ code: country.code, name: country.name }" />
+    </div>
+    <p v-else class="text-sm text-neutral-500">Pays introuvable.</p>
+  </section>
 </template>
 
 <script setup lang="ts">
-import { useRoute } from 'vue-router'
+import { computed } from 'vue'
+import CountryHeader from '@/components/country/CountryHeader.vue'
+import MetaList from '@/components/meta/MetaList.vue'
+import { useSupabaseClient } from '~/lib/supabase.client'
+import { createError, useAsyncData, useRoute } from '#imports'
+
 const route = useRoute()
-const code = route.params.code as string
+const supabase = useSupabaseClient()
+
+const codeParam = computed(() => String(route.params.code || ''))
+const normalizedCode = computed(() => codeParam.value.toUpperCase())
+
+const { data: country, pending, error } = await useAsyncData(
+  () => `country-${normalizedCode.value}`,
+  async () => {
+    if (!normalizedCode.value) {
+      throw createError({ statusCode: 404, statusMessage: 'Pays introuvable' })
+    }
+    const { data, error } = await supabase
+      .from('countries')
+      .select('code,name,continent,isCovered,capital')
+      .eq('code', normalizedCode.value)
+      .single()
+
+    if (error || !data) {
+      throw createError({ statusCode: 404, statusMessage: 'Pays introuvable' })
+    }
+
+    return data
+  },
+  { watch: [normalizedCode] }
+)
 </script>
