@@ -1,74 +1,51 @@
 <template>
   <div class="add-meta-container space-y-4">
     <transition name="fade">
-      <div
-        v-if="isCreating"
-        class="flex flex-col gap-6 rounded-[32px] border border-black/10 bg-white/95 p-6 shadow-lg lg:flex-row"
-      >
-        <div
-          class="media-panel flex flex-1 cursor-pointer flex-col gap-4 rounded-[28px] border border-dashed border-neutral-300 bg-neutral-50 p-4 text-center"
-          @click="triggerFileDialog"
-          @dragover.prevent
-          @drop.prevent="onDrop"
-        >
+      <div v-if="isCreating"
+        class="flex flex-col gap-6 rounded-[32px] border border-black/10 bg-white/95 p-6 shadow-lg lg:flex-row">
+        <div class="media-panel flex flex-1 cursor-pointer flex-col " @dragover.prevent @drop.prevent="onDrop">
           <input ref="fileInput" type="file" accept="image/*" class="hidden" @change="onFileChange" />
-          <div v-if="!preview" class="flex h-48 flex-col items-center justify-center gap-3 text-sm text-neutral-600">
+          <div v-if="!preview" class="flex h-48 flex-col items-center justify-center gap-3 text-sm text-neutral-600"
+            @click="triggerFileDialog">
             <p>Upload your picture</p>
             <svg width="40" height="40" viewBox="0 0 40 40" fill="none" xmlns="http://www.w3.org/2000/svg">
-              <path
-                d="M20 2v36M2 20h36"
-                stroke="currentColor"
-                stroke-width="3"
-                stroke-linecap="round"
-              />
+              <path d="M20 2v36M2 20h36" stroke="currentColor" stroke-width="3" stroke-linecap="round" />
             </svg>
             <p class="text-xs text-neutral-400">Click or drag an image</p>
           </div>
           <div v-else class="relative h-48 overflow-hidden rounded-[24px]">
             <img :src="preview" alt="Prévisualisation" class="h-full w-full object-cover" />
-            <button type="button" class="absolute right-3 top-3 rounded-full bg-white/80 px-3 py-1 text-xs" @click.stop="resetImage">
-              Retirer
+            <button type="button" class="absolute right-3 top-3  bg-white/80 px-3 py-1 text-xs"
+              @click.stop="resetImage">
+              clear
             </button>
           </div>
           <label class="text-xs uppercase tracking-[0.4em] text-neutral-400">Or paste your image</label>
-          <input ref="pasteInput" type="text" class="rounded-full border border-neutral-200 px-4 py-2 text-sm" placeholder="Cmd+V ici" @paste.prevent="onPaste" />
+          <input ref="pasteInput" type="text" class="rounded-full border border-neutral-200 px-4 py-2 text-sm"
+            placeholder="Cmd+V ici" @paste.prevent="onPaste" @click.prevent="" />
         </div>
 
         <div class="flex flex-1 flex-col gap-4">
           <div class="flex flex-col gap-4 lg:flex-row">
-            <input
-              v-model="form.name"
-              type="text"
+            <input v-model="form.name" type="text"
               class="w-full rounded-full border border-neutral-200 px-5 py-3 text-lg shadow-inner"
-              placeholder="Meta name"
-            />
+              placeholder="Meta name" />
             <div class="tag-select w-full rounded-3xl border border-neutral-200 px-4 py-3">
               <div class="flex flex-wrap gap-2">
-                <span
-                  v-for="tag in selectedTags"
-                  :key="tag"
-                  class="inline-flex items-center gap-1 rounded-full bg-black px-3 py-1 text-xs font-medium uppercase tracking-[0.3em] text-white"
-                >
+                <span v-for="tag in selectedTags" :key="tag"
+                  class="inline-flex items-center gap-1 rounded-full bg-black px-3 py-1 text-xs font-medium uppercase tracking-[0.3em] text-white">
                   {{ tag }}
                   <button type="button" class="text-white/70" @click="removeTag(tag)">&times;</button>
                 </span>
               </div>
               <div class="relative mt-2">
-                <input
-                  v-model="tagSearch"
-                  type="text"
-                  class="w-full rounded-full border border-neutral-200 px-4 py-2 text-sm"
-                  placeholder="Tags..."
-                  @keydown.enter.prevent="handleTagEnter"
-                  @input="filterSuggestions"
-                />
-                <ul v-if="suggestions.length" class="absolute z-10 mt-2 max-h-40 w-full overflow-y-auto rounded-2xl border border-neutral-200 bg-white text-sm">
-                  <li
-                    v-for="suggestion in suggestions"
-                    :key="suggestion"
-                    class="cursor-pointer px-4 py-2 hover:bg-neutral-100"
-                    @click="addTag(suggestion)"
-                  >
+                <input v-model="tagSearch" type="text"
+                  class="w-full rounded-full border border-neutral-200 px-4 py-2 text-sm" placeholder="Tags..."
+                  @keydown.enter.prevent="handleTagEnter" @input="filterSuggestions" />
+                <ul v-if="suggestions.length"
+                  class="absolute z-10 mt-2 max-h-40 w-full overflow-y-auto rounded-2xl border border-neutral-200 bg-white text-sm">
+                  <li v-for="suggestion in suggestions" :key="suggestion"
+                    class="cursor-pointer px-4 py-2 hover:bg-neutral-100" @click="addTag(suggestion)">
                     {{ suggestion }}
                   </li>
                 </ul>
@@ -76,47 +53,29 @@
             </div>
           </div>
 
-          <textarea
-            v-model="form.description"
-            rows="6"
+          <textarea v-model="form.description" rows="6"
             class="min-h-[180px] w-full rounded-[32px] border border-neutral-200 bg-neutral-50 px-5 py-4 text-base"
-            placeholder="Description"
-          ></textarea>
+            placeholder="Description"></textarea>
         </div>
       </div>
     </transition>
 
-    <button
-      type="button"
-      class="add-meta-button group flex items-center justify-center rounded-full border border-black px-6 py-3 text-base font-semibold uppercase tracking-[0.4em] transition hover:bg-black hover:text-white"
-      :disabled="isCreating && (!isValid || !country || submitting)"
-      @click="handlePrimaryClick"
-    >
+    <button type="button"
+      class="add-meta-button group flex items-center justify-center transition hover:bg-black hover:text-white"
+      :disabled="isCreating && (!isValid || !country || submitting)" @click="handlePrimaryClick">
       {{ isCreating ? 'Add the meta' : 'Add a meta' }}
       <span class="ml-3 flex items-center justify-center">
-        <svg
-          v-if="!isCreating"
-          width="21"
-          height="20"
-          viewBox="0 0 21 20"
-          xmlns="http://www.w3.org/2000/svg"
-          class="transition group-hover:text-white"
-        >
+        <svg v-if="!isCreating" width="21" height="20" viewBox="0 0 21 20" xmlns="http://www.w3.org/2000/svg"
+          class="transition group-hover:text-white">
           <path
             d="M10.5 0C4.989 0 0.5 4.489 0.5 10C0.5 15.511 4.989 20 10.5 20C16.011 20 20.5 15.511 20.5 10C20.5 4.489 16.011 0 10.5 0ZM10.5 2C14.9301 2 18.5 5.56988 18.5 10C18.5 14.4301 14.9301 18 10.5 18C6.06988 18 2.5 14.4301 2.5 10C2.5 5.56988 6.06988 2 10.5 2ZM9.5 5V9H5.5V11H9.5V15H11.5V11H15.5V9H11.5V5H9.5Z"
-            fill="currentColor"
-          />
+            fill="currentColor" />
         </svg>
-        <svg
-          v-else
-          width="21"
-          height="20"
-          viewBox="0 0 21 20"
-          xmlns="http://www.w3.org/2000/svg"
-          class="transition group-hover:text-white"
-        >
+        <svg v-else width="21" height="20" viewBox="0 0 21 20" xmlns="http://www.w3.org/2000/svg"
+          class="transition group-hover:text-white">
           <circle cx="10.5" cy="10" r="9" stroke="currentColor" stroke-width="2" fill="none" />
-          <path d="M6.5 10.5L9.5 13.5L15 8" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round" />
+          <path d="M6.5 10.5L9.5 13.5L15 8" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round"
+            stroke-linejoin="round" />
         </svg>
       </span>
     </button>
@@ -152,9 +111,26 @@ const form = reactive({
   file: null as File | null,
 })
 
+
 const countryCode = computed(() => props.country?.code?.toUpperCase?.())
 
 const isValid = computed(() => !!form.name && !!form.description && !!form.file && !!countryCode.value)
+
+// Move loadTags definition above watcher to fix ReferenceError
+const loadTags = async (code: string) => {
+  const { data, error } = await supabase
+    .from('meta_tags')
+    .select('name')
+    .eq('country_code', code)
+    .order('name')
+  if (error) {
+    console.error('Error fetching tags', error)
+    availableTagNames.value = []
+    return
+  }
+  availableTagNames.value = (data ?? []).map((t) => t.name)
+  filterSuggestions()
+}
 
 watch(countryCode, async (val) => {
   selectedTags.value = []
@@ -171,21 +147,6 @@ watch(() => props.country, (val) => {
     isCreating.value = true
   }
 })
-
-const loadTags = async (code: string) => {
-  const { data, error } = await supabase
-    .from('meta_tags')
-    .select('name')
-    .eq('country_code', code)
-    .order('name')
-  if (error) {
-    console.error('Error fetching tags', error)
-    availableTagNames.value = []
-    return
-  }
-  availableTagNames.value = (data ?? []).map((t) => t.name)
-  filterSuggestions()
-}
 
 const filterSuggestions = () => {
   const query = tagSearch.value.trim().toLowerCase()
@@ -360,6 +321,31 @@ const resetForm = () => {
 </script>
 
 <style scoped>
+.add-meta-button {
+  /* Add a meta */
+  box-sizing: border-box;
+  /* Auto layout */
+  display: flex;
+  flex-direction: row;
+  justify-content: center;
+  align-items: center;
+  padding: 16px 0px;
+  gap: 10px;
+
+  width: 100%;
+  height: 56px;
+
+  /* Black */
+  border: 2px solid #000000;
+
+  /* Inside auto layout */
+  flex: none;
+  order: 0;
+  align-self: stretch;
+  flex-grow: 0;
+
+}
+
 .fade-enter-active,
 .fade-leave-active {
   transition: opacity 0.2s ease, transform 0.2s ease;

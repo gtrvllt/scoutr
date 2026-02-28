@@ -13,7 +13,5 @@ const authStore = useAuthStore();
 <style scoped>
 .main-content {
     padding-top: 70px;
-    margin-left: 16px;
-    margin-right: 16px;
 }
 </style>

@@ -1,17 +1,20 @@
 <template>
-    <article class="meta-card group relative flex w-full items-stretch gap-6 rounded-[28px] border border-black/5 bg-white/95 p-6 text-black shadow-md transition hover:-translate-y-1 hover:shadow-2xl"
-        :class="isMetaHovered ? 'ring-2 ring-black/10' : ''" @mouseenter="isMetaHovered = true" @mouseleave="isMetaHovered = false"
-        @click="openFocus">
-        <div class="image-frame">
-            <img :src="meta.image_url" :alt="`${resolvedTitle} image`" class="h-full w-full object-cover" loading="lazy"/>
+    <div
+        class="meta-card flex flex-row items-stretch w-full bg-white"
+        :class="isMetaHovered ? 'shadow-lg' : ''" @mouseenter="isMetaHovered = true"
+        @mouseleave="isMetaHovered = false" @click="openFocus">
+        <div class="image-frame border-2 border-black">
+            <img :src="meta.image_url" :alt="`${resolvedTitle} image`" class="h-full w-full object-cover"
+                loading="lazy" />
         </div>
-        <div class="flex w-full flex-col gap-4">
+        <div class="meta-content flex w-full h-full flex-col p-6">
             <div class="flex flex-col gap-3 md:flex-row md:items-start md:justify-between">
-                <div class="space-y-2">
+                <div class="">
                     <div class="flex items-center gap-2 text-xs uppercase tracking-[0.4em] text-neutral-400">
-                        <span>{{ primaryTag || 'Meta' }}</span>
-                        <span v-if="countryFlag" class="inline-flex items-center gap-1">
-                            <NuxtLink v-if="countryLink" :to="countryLink" class="flag-chip" aria-label="Voir le pays" @click.stop>
+                        <!-- <span>{{ primaryTag || 'Meta' }}</span> -->
+                        <span v-if="countryFlag && route.path === '/metas'" class="inline-flex items-center gap-1">
+                            <NuxtLink v-if="countryLink" :to="countryLink" class="flag-chip" aria-label="Voir le pays"
+                                @click.stop>
                                 <span>{{ countryFlag }}</span>
                                 <span class="text-[10px]">{{ countryName || props.meta.country_code }}</span>
                             </NuxtLink>
@@ -30,14 +33,14 @@
             <p class="text-base leading-relaxed text-neutral-700">
                 {{ meta.description || '' }}
             </p>
-            <div class="flex flex-wrap gap-2 text-xs font-semibold uppercase tracking-[0.4em] text-neutral-500">
+            <!-- <div class="flex flex-wrap gap-2 text-xs font-semibold uppercase tracking-[0.4em] text-neutral-500">
                 <span v-for="tag in normalizedTags" :key="tag" class="rounded-full border border-neutral-200 px-3 py-1">
                     {{ tag }}
                 </span>
-            </div>
+            </div> -->
         </div>
         <div class="meta-map" aria-hidden="true"></div>
-    </article>
+    </div>
 
     <Teleport to="body">
         <transition name="meta-focus">
@@ -52,9 +55,8 @@
                             <h2 class="meta-focus-title">{{ resolvedTitle }}</h2>
                             <div class="meta-focus-actions">
                                 <button v-for="action in focusActions" :key="`${action.label}-focus`" type="button"
-                                    :aria-label="action.label" class="meta-focus-action"
-                                    :disabled="action.disabled" :aria-disabled="action.disabled"
-                                    @click.stop="!action.disabled && action.action()">
+                                    :aria-label="action.label" class="meta-focus-action" :disabled="action.disabled"
+                                    :aria-disabled="action.disabled" @click.stop="!action.disabled && action.action()">
                                     <img :src="getIcon(action)" alt="" />
                                 </button>
                                 <button type="button" class="meta-focus-close" @click="closeFocus" aria-label="Fermer">
@@ -75,9 +77,11 @@
 
 <script setup lang="ts">
 import { Teleport, computed, reactive, ref } from 'vue'
+import { useRoute } from 'vue-router'
 import type { Meta } from '@/types/meta'
 
 const props = defineProps<{ meta: Meta }>()
+const route = useRoute()
 const emit = defineEmits<{
     (e: 'edit', meta: Meta): void
     (e: 'deleted', metaId: string): void
@@ -240,7 +244,6 @@ const countryLink = computed(() => {
 </script>
 
 <style scoped>
-
 .meta-card {
     overflow: hidden;
 }
@@ -250,15 +253,17 @@ const countryLink = computed(() => {
     width: 220px;
     min-width: 220px;
     height: 180px;
-    border-radius: 24px;
-    border: 1px solid rgba(0, 0, 0, 0.08);
     background: #d7cfce;
     overflow: hidden;
 }
 
+.meta-content {
+    padding-right: 4px;
+}
+
 @media (min-width: 768px) {
     .image-frame {
-        width: 260px;
+        width: 400px;
         height: 200px;
     }
 }

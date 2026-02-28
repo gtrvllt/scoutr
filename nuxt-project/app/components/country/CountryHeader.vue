@@ -1,5 +1,5 @@
 <template>
-  <section class="country-hero relative isolate overflow-hidden rounded-[32px] border border-black/10 shadow-xl">
+  <section class="country-hero relative isolate">
     <img :src="heroImage" alt="Country landscape" class="absolute inset-0 h-full w-full object-cover" loading="lazy" />
     <div class="absolute inset-0 bg-gradient-to-r from-black/80 via-black/60 to-black/30"></div>
 
@@ -8,9 +8,8 @@
 
       <div class="grid gap-8 lg:grid-cols-[2fr_1fr] lg:items-center">
         <div class="space-y-2">
-          <p class="text-xs uppercase tracking-[0.5em] text-white/70">Country</p>
           <h1 class="text-4xl font-semibold leading-tight sm:text-5xl">{{ country.name }}</h1>
-          <div class="mt-4 grid gap-3 text-sm font-medium text-white/80 sm:grid-cols-2">
+          <div class="mt-4 text-sm font-medium text-white/80">
             <p>Capital // <span class="text-white">{{ country.capital || 'Unknown' }}</span></p>
             <p>Language // <span class="text-white">{{ country.language || '—' }}</span></p>
             <p>Code // <span class="text-white">{{ country.code }}</span></p>
@@ -24,10 +23,14 @@
             <span v-if="country.isCovered" class="text-emerald-300">Covered</span>
             <span v-else class="text-amber-200">Needs scouting</span>
           </p>
-          <div class="inline-flex items-center gap-2 rounded-full border border-white/20 px-4 py-2 text-sm backdrop-blur">
-            <span class="text-white/70">Flag</span>
-            <span class="text-2xl">{{ countryFlag || '🌍' }}</span>
-          </div>
+          
+            <img
+              v-if="country.code"
+              :src="`https://flagsapi.com/${country.code}/flat/64.png`"
+              alt="Country flag"
+              class="h-8 w-12 object-cover"
+            />
+            
         </div>
       </div>
     </div>

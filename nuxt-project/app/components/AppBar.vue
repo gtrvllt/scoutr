@@ -12,7 +12,7 @@
                 <NuxtLink to="/metas">All metas</NuxtLink>
                 <!-- <NuxtLink to="/addmeta">Add meta</NuxtLink> -->
             </div>
-            <UColorModeSwitch color="neutral"/>
+            <!-- <UColorModeSwitch color="neutral"/> -->
             <UserMenu />
         </div>
     </div>

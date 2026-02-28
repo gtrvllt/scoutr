@@ -4,7 +4,11 @@
     <p v-else-if="error" class="text-sm text-rose-600">{{ error.data?.statusMessage || error.message }}</p>
     <div v-else-if="country" class="space-y-10">
       <CountryHeader :country="country" />
-      <MetaList :country="{ code: country.code, name: country.name }" />
+      <div class="country-content">
+        <AddMeta :country="{ code: country.code, name: country.name }" v-model:isOpen="isAddFormOpen"
+          @added="refresh" />
+        <MetaList :country="{ code: country.code, name: country.name }" />
+      </div>
     </div>
     <p v-else class="text-sm text-neutral-500">Pays introuvable.</p>
   </section>
@@ -44,3 +48,10 @@ const { data: country, pending, error } = await useAsyncData(
   { watch: [normalizedCode] }
 )
 </script>
+<style scoped>
+.country-content {
+  padding-left: 120px;
+  padding-right: 120px; 
+  padding-bottom: 60px; 
+}
+</style>

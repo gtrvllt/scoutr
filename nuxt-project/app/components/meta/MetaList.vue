@@ -1,26 +1,6 @@
 <template>
   <section class="space-y-8">
-    <div class="rounded-[28px] border border-black/5 bg-white/90 p-6 shadow-xl">
-      <div class="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
-        <div class="flex flex-1 flex-col gap-3 lg:flex-row lg:items-center">
-          <UInput
-            v-model="searchQuery"
-            icon="i-lucide-search"
-            placeholder="Search a meta"
-            class="w-full max-w-xl"
-            variant="outline"
-          />
-          <div class="flex items-center gap-2 text-xs uppercase tracking-[0.4em] text-neutral-400">
-            <span>Metas</span>
-            <span class="h-1 w-1 rounded-full bg-neutral-300" aria-hidden="true"></span>
-            <span>{{ metas.length }} entries</span>
-          </div>
-        </div>
-        <UButton size="lg" color="black" class="uppercase tracking-[0.4em]" @click="toggleAddMeta">
-          {{ isAddFormOpen ? 'Close' : 'New Meta' }}
-        </UButton>
-      </div>
-
+    <div class="tags-container">
       <Transition name="fade">
         <div v-if="isAddFormOpen" class="mt-6">
           <AddMeta v-model:open="isAddFormOpen" :country="country" @meta-added="handleMetaAdded">
@@ -32,23 +12,18 @@
       </Transition>
 
       <div v-if="tagNames.length" class="mt-6 flex flex-wrap gap-3">
-        <button
-          v-for="tag in tagNames"
-          :key="tag"
-          type="button"
-          class="rounded-full border px-4 py-1 text-sm font-medium transition"
-          :class="selectedTags.includes(tag) ? 'border-black bg-black text-white' : 'border-neutral-200 bg-white hover:border-black'"
-          @click="toggleTag(tag)"
-        >
+        <button v-for="tag in tagNames" :key="tag" class="tag-button"
+          :class="selectedTags.includes(tag) ? 'bg-black text-white border-2 border-black' : ' border-2 border-black border-black  hover:border-black'"
+          @click="toggleTag(tag)">
           {{ tag }}
         </button>
         <button v-if="selectedTags.length" type="button" class="text-sm underline" @click="clearTags">
-          Reset
+          Reset tags
         </button>
       </div>
     </div>
 
-    <div class="rounded-[32px] border border-black/5 bg-white/90 p-6 shadow-xl">
+    <div class="">
       <div v-if="loading" class="text-sm text-neutral-500">Chargement des métas…</div>
       <p v-else-if="error" class="text-sm text-rose-600">{{ error }}</p>
       <p v-else-if="!filteredMetas.length" class="text-sm text-neutral-500">
@@ -56,14 +31,8 @@
       </p>
 
       <div v-else class="space-y-6">
-        <MetaItem
-          v-for="meta in filteredMetas"
-          :key="meta.id"
-          :meta="meta"
-          @edit="handleMetaEdit"
-          @deleted="handleMetaDeleted"
-          @error="handleMetaError"
-        />
+        <MetaItem v-for="meta in filteredMetas" :key="meta.id" :meta="meta" @edit="handleMetaEdit"
+          @deleted="handleMetaDeleted" @error="handleMetaError" />
       </div>
     </div>
   </section>
@@ -194,3 +163,16 @@ const toggleAddMeta = () => {
   isAddFormOpen.value = !isAddFormOpen.value
 }
 </script>
+<style scoped>
+.tag-button {
+  /* Tag button no Hover */
+  margin: 2px solid black;
+  width: 119px;
+  height: 51px;
+  /* Inside auto layout */
+  flex: none;
+  order: 0;
+  flex-grow: 0;
+
+}
+</style>
