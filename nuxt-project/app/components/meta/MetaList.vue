@@ -12,7 +12,7 @@
       </Transition>
 
       <div v-if="tagNames.length" class="mt-6 flex flex-wrap gap-3">
-        <button v-for="tag in tagNames" :key="tag" class="tag-button"
+        <button v-for="tag in tagNames" :key="tag" class="tag-button overflow-hidden"
           :class="selectedTags.includes(tag) ? 'bg-black text-white border-2 border-black' : ' border-2 border-black border-black  hover:border-black'"
           @click="toggleTag(tag)">
           {{ tag }}

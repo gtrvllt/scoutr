@@ -15,7 +15,7 @@
 </template>
 
 <script setup lang="ts">
-import { computed } from 'vue'
+import { computed, ref } from 'vue'
 import CountryHeader from '@/components/country/CountryHeader.vue'
 import MetaList from '@/components/meta/MetaList.vue'
 import { useSupabaseClient } from '~/lib/supabase.client'
@@ -26,6 +26,14 @@ const supabase = useSupabaseClient()
 
 const codeParam = computed(() => String(route.params.code || ''))
 const normalizedCode = computed(() => codeParam.value.toUpperCase())
+
+// local state to control the AddMeta dialog
+const isAddFormOpen = ref(false)
+
+// called when the AddMeta component emits "added" — placeholder for now
+const refresh = async () => {
+  // noop: MetaList refreshes itself. Implement if you want the page to trigger a MetaList refresh.
+}
 
 const { data: country, pending, error } = await useAsyncData(
   () => `country-${normalizedCode.value}`,
