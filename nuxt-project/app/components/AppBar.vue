@@ -1,33 +1,34 @@
 <template>
     <div class="app-bar h-[70px] w-full">
-        <div class="flex items-center h-full w-full justify-between gap-4">
-            <button @click="toggleMenu" class="p-2 focus:outline-none cursor-pointer burger-btn">
+        <div class="flex items-center h-full w-full relative px-4">
+
+            <button @click="toggleMenu" class="p-2 focus:outline-none cursor-pointer z-[70] bg-[#f8f9fa]">
                 <img :src="burgerMenuOpen ? closeIcon : burgerIcon" alt="Menu" class="h-6 w-6" />
             </button>
-            <div ref="logoContainer" class="logo-container flex items-center">
-                <!-- Left div that appears and moves with the logo (hidden behind burger when closed) -->
-                <div ref="leftBadge" class="menu-actions mr-2 opacity-0 pointer-events-none">
-                    <NuxtLink to="/" :class="burgerMenuOpen ? 'scoutr-logo-open' : 'scoutr-logo'"
-                        class="inline-flex items-center">
-                        CGU
-                    </NuxtLink>
-                    <NuxtLink to="/" :class="burgerMenuOpen ? 'scoutr-logo-open' : 'scoutr-logo'"
-                        class="inline-flex items-center">
-                        ppouler
-                    </NuxtLink>
-                </div>
-                <NuxtLink to="/" :class="burgerMenuOpen ? 'scoutr-logo-open' : 'scoutr-logo'"
-                    class="inline-flex items-center">
+
+            <div ref="testText"
+                class="test-label absolute font-bold transition-all duration-500 ease-out pointer-events-none"
+                :class="burgerMenuOpen ? 'translate-x-[60px] opacity-100' : 'translate-x-0 opacity-0'">
+                <NuxtLink to="/newsletter">Newsletter</NuxtLink>
+                <NuxtLink to="/about-us">About us</NuxtLink>
+                <NuxtLink to="/donate">Donate</NuxtLink>
+                <NuxtLink to="/terms-of-use">Terms of use</NuxtLink>
+            </div>
+
+            <div ref="logoContainer" class="logo-container flex items-center z-50 ml-4 bg-[#f8f9fa]">
+                <NuxtLink to="/" class="inline-flex items-center">
                     <img src="/logo.svg" alt="Logo" class="h-10 w-auto" />
+                    <!-- <span class="ml-2">Scoutr</span> -->
                 </NuxtLink>
             </div>
-            <div ref="actionsWrap" class="main-appbar-actions flex-1 flex items-center justify-center gap-4">
+
+            <div ref="actionsWrap"
+                class="flex-1 flex items-center justify-center gap-8 transition-opacity duration-300">
                 <NuxtLink to="/metas">All metas</NuxtLink>
-                <NuxtLink to="/quizz" class="ml-6">Quizz</NuxtLink>
-                <!-- <NuxtLink to="/addmeta">Add meta</NuxtLink> -->
+                <NuxtLink to="/quizz">Quizz</NuxtLink>
             </div>
-            <!-- <UColorModeSwitch color="neutral"/> -->
-            <div ref="userMenuWrap">
+
+            <div ref="userMenuWrap" class="z-[70]">
                 <UserMenu />
             </div>
         </div>
@@ -35,67 +36,49 @@
 </template>
 
 <script setup lang="ts">
-///// burger menu
+import { ref, nextTick } from 'vue'
 import burgerIcon from '@/assets/icons/burger.svg'
 import closeIcon from '@/assets/icons/close.svg'
 
-import { ref, nextTick } from 'vue'
-
 const burgerMenuOpen = ref(false)
-
-// refs for DOM elements
 const logoContainer = ref<HTMLElement | null>(null)
 const userMenuWrap = ref<HTMLElement | null>(null)
 const actionsWrap = ref<HTMLElement | null>(null)
 const leftBadge = ref<HTMLElement | null>(null)
+const testText = ref<HTMLElement | null>(null)
 
 const toggleMenu = async () => {
-    const opening = !burgerMenuOpen.value
-    burgerMenuOpen.value = opening
-
-    // wait DOM update
+    burgerMenuOpen.value = !burgerMenuOpen.value
     await nextTick()
 
-    // if opening, slide logo to the right so it overlays actions and sits left of user menu
-    if (opening && logoContainer.value && userMenuWrap.value) {
+    if (burgerMenuOpen.value && logoContainer.value && userMenuWrap.value) {
         const logoRect = logoContainer.value.getBoundingClientRect()
         const userRect = userMenuWrap.value.getBoundingClientRect()
-        const desiredMargin = 8 // px gap between logo and user menu
-        // compute dx so logo's right edge ends desiredMargin left of user menu's left
-        const dx = userRect.left - (logoRect.left + logoRect.width) - desiredMargin
-        // apply transform
+
+        // Calcul pour coller à gauche du bouton user (avec 16px de marge)
+        const desiredMargin = 16
+        const dx = userRect.left - logoRect.right - desiredMargin
+
         logoContainer.value.style.transform = `translateX(${dx}px)`
-        logoContainer.value.style.zIndex = '60'
-        // show left badge
+
         if (leftBadge.value) {
             leftBadge.value.style.opacity = '1'
             leftBadge.value.style.pointerEvents = 'auto'
         }
-        // fade actions while sliding
         if (actionsWrap.value) {
-            actionsWrap.value.classList.add('opacity-0', 'pointer-events-none')
+            actionsWrap.value.style.opacity = '0'
+            actionsWrap.value.style.pointerEvents = 'none'
         }
-    } else if (!opening && logoContainer.value) {
-        // closing: reset transform and show actions
+    } else if (logoContainer.value) {
+        // Reset
         logoContainer.value.style.transform = ''
-        logoContainer.value.style.zIndex = ''
-        // hide left badge
-        if (leftBadge.value) {
-            leftBadge.value.style.opacity = '0'
-            leftBadge.value.style.pointerEvents = 'none'
-        }
+        if (leftBadge.value) leftBadge.value.style.opacity = '0'
         if (actionsWrap.value) {
-            actionsWrap.value.classList.remove('opacity-0', 'pointer-events-none')
+            actionsWrap.value.style.opacity = '1'
+            actionsWrap.value.style.pointerEvents = 'auto'
         }
     }
-
-    console.log('Menu toggled', burgerMenuOpen.value)
 }
-///// logo
-///// liens de l'appbar
-///// bouton user
-
-
 </script>
 
 <style scoped>
@@ -104,48 +87,28 @@ const toggleMenu = async () => {
     color: black;
     font-weight: 600;
     background-color: #f8f9fa;
-    display: flex;
-    align-items: center;
-    padding: 0 16px;
     position: fixed;
     top: 0;
     left: 0;
     right: 0;
     z-index: 50;
-}
-
-/* logo */
-.scoutr-logo {
-    display: flex;
-    position: relative;
-    /* right: 0px; */
-    left: 0px;
-    /* spring-like */
+    border-bottom: 1px solid #e5e7eb;
 }
 
 .logo-container {
-    transition: transform 0.55s cubic-bezier(0.16, 1, 0.3, 1);
+    transition: transform 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+    /* Effet ressort */
     will-change: transform;
-    position: relative; /* allow menu-actions absolute positioning relative to the container */
 }
 
-.scoutr-logo-open {
-    right: 0px;
+.test-label {
+    left: 20px;
+    /* Position de départ sous le bouton burger */
+    font-size: 20px;
+    z-index: 65;
 }
 
 .menu-actions {
-    transition: opacity 0.35s ease-in-out, transform 0.45s ease-in-out;
-    /* place behind the burger by default (will be hidden) */
-    position: absolute;
-    left: -44px; /* adjust to sit under the burger button */
-    top: 50%;
-    /* transform: translateY(-50%); */
-    z-index: 10;
-    /* display: none; */
-}
-
-.burger-btn {
-    position: relative;
-    z-index: 70;
+    transition: opacity 0.4s ease;
 }
 </style>
