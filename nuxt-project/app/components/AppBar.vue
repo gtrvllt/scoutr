@@ -1,114 +1,78 @@
 <template>
-    <div class="app-bar h-[70px] w-full">
-        <div class="flex items-center h-full w-full relative px-4">
+    <nav class="app-bar h-[70px] w-full flex items-center px-4 relative overflow-hidden">
 
-            <button @click="toggleMenu" class="p-2 focus:outline-none cursor-pointer z-[70] bg-[#f8f9fa]">
-                <img :src="burgerMenuOpen ? closeIcon : burgerIcon" alt="Menu" class="h-6 w-6" />
-            </button>
+        <button @click="burgerMenuOpen = !burgerMenuOpen"
+            class="z-[70] p-2  relative cursor-pointer focus:outline-none">
+            <img :src="burgerMenuOpen ? closeIcon : burgerIcon" alt="Menu" class="h-6 w-6" />
+        </button>
+        <div class="flex items-center h-full z-50  flex-1 transition-all duration-500">
 
-            <div ref="testText"
-                class="test-label absolute font-bold transition-all duration-500 ease-out pointer-events-none"
-                :class="burgerMenuOpen ? 'translate-x-[60px] opacity-100' : 'translate-x-0 opacity-0'">
-                <NuxtLink to="/newsletter">Newsletter</NuxtLink>
-                <NuxtLink to="/about-us">About us</NuxtLink>
-                <NuxtLink to="/donate">Donate</NuxtLink>
-                <NuxtLink to="/terms-of-use">Terms of use</NuxtLink>
+            <div class="menu-actions flex items-center justify-center gap-6 overflow-hidden transition-all duration-500 ease-in-out h-full "
+                :class="burgerMenuOpen ? 'flex-1 opacity-100 px-8' : 'w-0 opacity-1 px-0'">
+                <NuxtLink to="/newsletter"
+                    class="text-base whitespace-nowrap h-full items-center flex hover:bg-black hover:text-white px-4">
+                    Newsletter</NuxtLink>
+                <NuxtLink to="/about-us"
+                    class="text-base whitespace-nowrap h-full items-center flex hover:bg-black hover:text-white px-4">
+                    About us</NuxtLink>
+                <NuxtLink to="/donate"
+                    class="text-base whitespace-nowrap h-full items-center flex hover:bg-black hover:text-white px-4">
+                    Donate</NuxtLink>
+                <NuxtLink to="/terms-of-use"
+                    class="text-base whitespace-nowrap h-full items-center flex hover:bg-black hover:text-white px-4">
+                    Terms of use</NuxtLink>
             </div>
 
-            <div ref="logoContainer" class="logo-container flex items-center z-50 ml-4 bg-[#f8f9fa]">
-                <NuxtLink to="/" class="inline-flex items-center">
-                    <img src="/logo.svg" alt="Logo" class="h-10 w-auto" />
-                    <!-- <span class="ml-2">Scoutr</span> -->
-                </NuxtLink>
-            </div>
-
-            <div ref="actionsWrap"
-                class="flex-1 flex items-center justify-center gap-8 transition-opacity duration-300">
-                <NuxtLink to="/metas">All metas</NuxtLink>
-                <NuxtLink to="/quizz">Quizz</NuxtLink>
-            </div>
-
-            <div ref="userMenuWrap" class="z-[70]">
-                <UserMenu />
-            </div>
+            <NuxtLink to="/" class="scoutr-logo inline-flex items-center transition-all duration-500 "
+                :class="burgerMenuOpen ? 'ml-0 pr-4' : 'ml-4'">
+                <img src="/logo.svg" alt="Logo" class="h-10 w-auto" />
+            </NuxtLink>
         </div>
-    </div>
+
+        <div class="main-actions absolute inset-0 flex items-center justify-center gap-8 z-10 pointer-events-none">
+            <NuxtLink to="/metas" class="pointer-events-auto">All metas</NuxtLink>
+            <NuxtLink to="/quizz" class="pointer-events-auto">Quizz</NuxtLink>
+        </div>
+
+        <div class="z-[70]  pl-4 h-full flex items-center">
+            <UserMenu />
+        </div>
+
+    </nav>
 </template>
 
 <script setup lang="ts">
-import { ref, nextTick } from 'vue'
+import { ref } from 'vue'
 import burgerIcon from '@/assets/icons/burger.svg'
 import closeIcon from '@/assets/icons/close.svg'
 
 const burgerMenuOpen = ref(false)
-const logoContainer = ref<HTMLElement | null>(null)
-const userMenuWrap = ref<HTMLElement | null>(null)
-const actionsWrap = ref<HTMLElement | null>(null)
-const leftBadge = ref<HTMLElement | null>(null)
-const testText = ref<HTMLElement | null>(null)
-
-const toggleMenu = async () => {
-    burgerMenuOpen.value = !burgerMenuOpen.value
-    await nextTick()
-
-    if (burgerMenuOpen.value && logoContainer.value && userMenuWrap.value) {
-        const logoRect = logoContainer.value.getBoundingClientRect()
-        const userRect = userMenuWrap.value.getBoundingClientRect()
-
-        // Calcul pour coller à gauche du bouton user (avec 16px de marge)
-        const desiredMargin = 16
-        const dx = userRect.left - logoRect.right - desiredMargin
-
-        logoContainer.value.style.transform = `translateX(${dx}px)`
-
-        if (leftBadge.value) {
-            leftBadge.value.style.opacity = '1'
-            leftBadge.value.style.pointerEvents = 'auto'
-        }
-        if (actionsWrap.value) {
-            actionsWrap.value.style.opacity = '0'
-            actionsWrap.value.style.pointerEvents = 'none'
-        }
-    } else if (logoContainer.value) {
-        // Reset
-        logoContainer.value.style.transform = ''
-        if (leftBadge.value) leftBadge.value.style.opacity = '0'
-        if (actionsWrap.value) {
-            actionsWrap.value.style.opacity = '1'
-            actionsWrap.value.style.pointerEvents = 'auto'
-        }
-    }
-}
 </script>
 
 <style scoped>
 .app-bar {
     font-size: 25px;
-    color: black;
     font-weight: 600;
-    background-color: #f8f9fa;
+    /* background-color: #f8f9fa; */
+    background-color: transparent;
     position: fixed;
     top: 0;
-    left: 0;
-    right: 0;
-    z-index: 50;
     border-bottom: 1px solid #e5e7eb;
 }
 
-.logo-container {
-    transition: transform 0.5s cubic-bezier(0.4, 0, 0.2, 1);
-    /* Effet ressort */
-    will-change: transform;
-}
-
-.test-label {
-    left: 20px;
-    /* Position de départ sous le bouton burger */
-    font-size: 20px;
-    z-index: 65;
-}
-
 .menu-actions {
-    transition: opacity 0.4s ease;
+    background: white;
+}
+
+.scoutr-logo {
+    font-size: 25px;
+    font-weight: 600;
+    color: #000;
+}
+
+/* On s'assure que la transition est fluide pour le changement de largeur */
+.transition-all {
+    transition-property: all;
+    transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
 }
 </style>
