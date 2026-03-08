@@ -56,7 +56,7 @@ const filteredCountries = computed<CountryEntry[]>(() => {
   if (!term) {
     return countries
   }
-  return countries.filter((country) => country.name.toLowerCase().includes(term))
+  return countries.filter((country) => country.name.toLowerCase().includes(term) || country.continent?.toLowerCase().includes(term))
 })
 
 watch(isCountryListOpen, (open) => {
