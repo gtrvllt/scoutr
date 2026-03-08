@@ -202,5 +202,9 @@ onBeforeUnmount(() => {
   }
 })
 </script>
-
+<style>
+.map-container {
+  z-index: 0;
+}
+</style>
 

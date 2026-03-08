@@ -18,7 +18,7 @@
                 </div>
                 <div v-else class="relative h-48 overflow-hidden">
                   <img :src="preview" alt="Prévisualisation" class="h-full w-full object-cover" />
-                  <button type="button" class="absolute right-3 top-3  bg-white/80 px-3 py-1 text-xs"
+                  <button type="button" class="absolute right-3 top-3  bg-white/80 px-3 py-1 text-xs border-1 border-black cursor-pointer"
                     @click.stop="resetImage">
                     clear
                   </button>
@@ -59,6 +59,7 @@
               <textarea v-model="form.description" rows="3" class="w-full shadow-inner px-5 py-4 text-base"
                 placeholder="Description"></textarea>
             </div>
+            <img class="close-add-meta cursor-pointer" :src="closeIcon" @click="onClose">
           </div>
           <button type="button"
             class="add-meta-button group flex items-center justify-center transition hover:bg-black hover:text-white cursor-pointer"
@@ -96,6 +97,13 @@
 import { computed, reactive, ref, watch } from 'vue'
 import { useSupabaseClient } from '~/lib/supabase.client'
 import { useAuthStore } from '~/stores/auth'
+
+
+// gestion ouverture
+import closeIcon from '@/assets/icons/close.svg'
+const onClose = () => {
+ isCreating.value = false 
+}
 
 const props = defineProps<{ country: { code: string; name: string } | null }>()
 const emit = defineEmits<{ (e: 'meta-added'): void }>()
@@ -367,5 +375,13 @@ const resetForm = () => {
 .fade-leave-to {
   opacity: 0;
   transform: translateY(-12px);
+}
+
+.close-add-meta {
+  position: relative;
+  top: 0px;
+  right: 0px;
+  height: 24px;
+  width: 24px;
 }
 </style>

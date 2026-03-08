@@ -1,6 +1,7 @@
 <template>
     <div class="scoutr-app main-content h-full">
         <AppBar />
+        <CountryList />
         <slot />
         <LoginDialog v-model:isOpen="authStore.isLoginOpen" />
     </div>

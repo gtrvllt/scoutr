@@ -29,7 +29,7 @@
             </NuxtLink>
         </div>
 
-        <div class="main-actions absolute inset-0 flex items-center justify-center gap-8 z-10 pointer-events-none">
+        <div class="main-actions absolute inset-0 flex items-center justify-center gap-8 z-10 pointer-events-none" :style="{zIndex: burgerMenuOpen ? 0 : 100}">
             <NuxtLink to="/metas" class="pointer-events-auto">All metas</NuxtLink>
             <NuxtLink to="/quizz" class="pointer-events-auto">Quizz</NuxtLink>
         </div>

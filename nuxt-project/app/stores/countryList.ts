@@ -8,5 +8,8 @@ export const useCountryListStore = defineStore('countryList', {
     setIsCountryListOpen(v: boolean) {
       this.isCountryListOpen = v
     },
+    toggle() {
+      this.isCountryListOpen = !this.isCountryListOpen
+    },
   },
 })

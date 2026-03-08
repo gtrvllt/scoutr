@@ -28,7 +28,7 @@
               v-if="country.code"
               :src="`https://flagsapi.com/${country.code}/flat/64.png`"
               alt="Country flag"
-              class="h-8 w-12 object-cover"
+              class="h-8 w-12 object-cover position-relative"
             />
             
         </div>
