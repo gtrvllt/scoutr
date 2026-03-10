@@ -20,21 +20,24 @@ type ActionLike = {
     icon?: string | null
     hoverIcon?: string | null
     isHovered?: boolean | null
+    name?: string | null
     disabled?: boolean | null
 }
 
-const props = withDefaults(defineProps<{ actions?: ActionLike[] }>(), {
-    actions: () => []
+const props = withDefaults(defineProps<{ actions?: ActionLike[], isMetaHovered?: boolean }>(), {
+    actions: () => [],
+    isMetaHovered: false,
 })
 
 const hoveredIndex = ref<number | null>(null)
 
 const getIcon = (action?: ActionLike, index?: number) => {
+    console.log('getIcon', { action, index, hoveredIndex: hoveredIndex.value })
     if (!action) return ''
     const icon = action.icon ?? ''
     const hoverIcon = action.hoverIcon ?? icon
     if (action.disabled) return icon
-    const isHovered = (typeof index === 'number' && hoveredIndex.value === index) || !!action.isHovered
+    const isHovered = (typeof index === 'number' && hoveredIndex.value === index) || !!action.isHovered || (action.name === "expand" && props.isMetaHovered)
     return isHovered ? hoverIcon : icon
 }
 </script>

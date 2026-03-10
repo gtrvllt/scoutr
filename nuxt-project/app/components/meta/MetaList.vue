@@ -46,7 +46,7 @@ import type { Meta } from '@/types/meta'
 import { useSupabaseClient } from '~/lib/supabase.client'
 import { useAuthStore } from '~/stores/auth'
 
-const props = defineProps<{ country: { code: string; name: string } }>()
+const props = defineProps<{ country: { code: string |null } }>()
 
 const supabase = useSupabaseClient()
 const toast = useToast()
@@ -59,17 +59,23 @@ const error = ref<string | null>(null)
 const searchQuery = ref('')
 const isAddFormOpen = ref(false)
 
-const countryCode = computed(() => props.country.code?.toUpperCase?.())
+const countryCode = computed(() => props.country.code?.toUpperCase?.() || null)
 
 const refresh = async () => {
-  if (!countryCode.value) return
   loading.value = true
   error.value = null
   try {
+    let metasQuery = supabase.from('metas').select('*')
+    let tagsQuery = supabase.from('meta_tags').select('name')
+    if (countryCode.value) {
+      metasQuery = metasQuery.eq('country_code', countryCode.value)
+      tagsQuery = tagsQuery.eq('country_code', countryCode.value)
+    }
     const [metasRes, tagsRes] = await Promise.all([
-      supabase.from('metas').select('*').eq('country_code', countryCode.value).order('id', { ascending: false }),
-      supabase.from('meta_tags').select('name').eq('country_code', countryCode.value).order('name'),
+      metasQuery.order('id', { ascending: false }),
+      tagsQuery.order('name'),
     ])
+    console.log('ABC metasres', metasRes)
     if (metasRes.error) throw metasRes.error
     if (tagsRes.error) throw tagsRes.error
     metas.value = metasRes.data ?? []
@@ -82,13 +88,8 @@ const refresh = async () => {
   }
 }
 
-watch(countryCode, async (value) => {
+watch(countryCode, async () => {
   selectedTags.value = []
-  if (!value) {
-    metas.value = []
-    tagNames.value = []
-    return
-  }
   await refresh()
 }, { immediate: true })
 

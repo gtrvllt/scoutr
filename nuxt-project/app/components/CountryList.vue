@@ -92,7 +92,7 @@ const handlePanelClick = () => {
 <style scoped>
 .country-list-drawer {
   position: fixed;
-  top: 0;
+  top: 70px;
   left: 0;
   bottom: 0;
   z-index: 45;

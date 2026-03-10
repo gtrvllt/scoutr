@@ -11,8 +11,11 @@
                 <div class="text-sm text-gray-600">{{ meta.description || '' }}</div>
             </li>
         </ul> -->
+        <div class="all-metas-container">
+            <h1>meta list</h1>
+            <MetaList :country="{ code: null }" />
 
-        <MetaItem v-for="meta in metas" :key="meta.id" :meta="meta" />
+        </div>
         <!-- </ul> -->
     </div>
 </template>
@@ -31,4 +34,12 @@ const { data: metas, pending, error } = await useAsyncData('metas', async () => 
     return data ?? []
 })
 </script>
-<style scoped></style>
+<style scoped>
+.all-metas-page {
+    padding: 2rem;
+}
+
+.meta-item-container {
+    margin-bottom: 1rem;
+}
+</style>

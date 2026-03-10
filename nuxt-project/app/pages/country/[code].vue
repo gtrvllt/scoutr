@@ -7,7 +7,7 @@
       <div class="country-content">
         <AddMeta :country="{ code: country.code, name: country.name }" v-model:isOpen="isAddFormOpen"
           @added="refresh" />
-        <MetaList :country="{ code: country.code, name: country.name }" />
+        <MetaList :country="{ code: country.code }" />
       </div>
     </div>
     <p v-else class="text-sm text-neutral-500">Pays introuvable.</p>

@@ -317,6 +317,7 @@ const submit = async () => {
       tags: selectedTags.value,
       image_url: imageUrl,
       country_code: countryCode.value,
+      user_id: authStore.user?.id
     }
     const { error } = await supabase.from('metas').insert(payload)
     if (error) throw error

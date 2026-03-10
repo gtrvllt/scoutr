@@ -51,9 +51,10 @@ const burgerMenuOpen = ref(false)
 
 <style scoped>
 .app-bar {
+    z-index: 100;
+    background-color: white !important;
     font-size: 25px;
     font-weight: 600;
-    /* background-color: #f8f9fa; */
     background-color: transparent;
     position: fixed;
     top: 0;

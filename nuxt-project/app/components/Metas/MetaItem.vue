@@ -1,9 +1,8 @@
 <template>
-    <div
-        class="meta-card flex flex-row items-stretch w-full bg-white"
-        :class="isMetaHovered ? 'shadow-lg' : ''" @mouseenter="isMetaHovered = true"
+    <div class="meta-card flex flex-row items-stretch w-full bg-white cursor-pointer border-2 "
+        :class="isMetaHovered ? 'border-black' : 'border-transparent'" @mouseenter="isMetaHovered = true"
         @mouseleave="isMetaHovered = false" @click="openFocus">
-        <div class="image-frame border-2 border-black">
+        <div class="image-frame" :class="isMetaHovered ? 'border-r-2 border-black' : 'border-2 border-black'">
             <img :src="meta.image_url" :alt="`${resolvedTitle} image`" class="h-full w-full object-cover"
                 loading="lazy" />
         </div>
@@ -27,7 +26,7 @@
                     <h3 class="text-2xl font-semibold leading-tight">{{ resolvedTitle }}</h3>
                 </div>
                 <div class="flex items-center justify-end gap-3">
-                    <PictoRow :actions="visibleActions" />
+                    <PictoRow :actions="visibleActions" :isMetaHovered="isMetaHovered" />
                 </div>
             </div>
             <p class="text-base leading-relaxed text-neutral-700">
@@ -42,6 +41,7 @@
         <div class="meta-map" aria-hidden="true"></div>
     </div>
 
+    <!-- version focus -->
     <Teleport to="body">
         <transition name="meta-focus">
             <div v-if="isFocused" class="meta-focus-overlay" role="dialog" aria-modal="true"
@@ -76,7 +76,7 @@
 </template>
 
 <script setup lang="ts">
-import { Teleport, computed, reactive, ref } from 'vue'
+import { Teleport, computed, reactive, ref, onBeforeUnmount, onMounted, watch } from 'vue'
 import { useRoute } from 'vue-router'
 import type { Meta } from '@/types/meta'
 
@@ -107,6 +107,7 @@ import PictoRow from './PictoRow.vue'
 
 
 type Action = {
+    name: string
     icon: string
     label: string
     isHovered: boolean
@@ -121,6 +122,8 @@ const isFocused = ref(false)
 const openFocus = () => {
     isFocused.value = true
 }
+
+const isMetaHovered = ref(false)
 
 const onEditMeta = () => {
     if (!isLogged.value) {
@@ -156,9 +159,9 @@ const onDeleteMeta = async () => {
     }
 }
 const actions = reactive<Action[]>([
-    { icon: expandIcon, action: openFocus, label: 'Expand meta details', isHovered: false, hoverIcon: hoverExpandIcon, showOnFocus: false },
-    { icon: editIcon, action: onEditMeta, label: 'Edit meta', isHovered: false, hoverIcon: hoverEditIcon, showOnFocus: true, requiresAuth: true },
-    { icon: trashIcon, action: onDeleteMeta, label: 'Delete meta', isHovered: false, hoverIcon: hoverTrashIcon, showOnFocus: true, requiresAuth: true },
+    { icon: expandIcon, action: openFocus, name: 'expand', label: 'Expand meta details', isHovered: isMetaHovered.value, hoverIcon: hoverExpandIcon, showOnFocus: false },
+    { icon: editIcon, action: onEditMeta, name: 'edit', label: 'Edit meta', isHovered: false, hoverIcon: hoverEditIcon, showOnFocus: true, requiresAuth: true },
+    { icon: trashIcon, action: onDeleteMeta, name: 'delete', label: 'Delete meta', isHovered: false, hoverIcon: hoverTrashIcon, showOnFocus: true, requiresAuth: true },
 ])
 
 const visibleActions = computed(() => {
@@ -174,7 +177,7 @@ const visibleActions = computed(() => {
 
 const focusActions = computed(() => visibleActions.value.filter((action) => action.showOnFocus))
 
-const isMetaHovered = ref(false)
+
 
 const getIcon = (action: Action) => {
     const shouldHover = action.label === 'Expand meta details'
@@ -201,6 +204,25 @@ const primaryTag = computed(() => normalizedTags.value[0] || null)
 const closeFocus = () => {
     isFocused.value = false
 }
+
+const handleKeyDown = (event: KeyboardEvent) => {
+    if (event.key === 'Escape' && isFocused.value) {
+        closeFocus()
+    }
+}
+
+onMounted(() => {
+    window.addEventListener('keydown', handleKeyDown)
+})
+
+onBeforeUnmount(() => {
+    window.removeEventListener('keydown', handleKeyDown)
+    document.body.style.overflow = ''
+})
+
+watch(isFocused, (focused) => {
+    document.body.style.overflow = focused ? 'hidden' : ''
+})
 ///// gestion du titre à afficher
 const resolvedTitle = computed(() => props.meta.title || props.meta.name || 'Meta')
 
@@ -246,6 +268,7 @@ const countryLink = computed(() => {
 <style scoped>
 .meta-card {
     overflow: hidden;
+    box-sizing: border-box;
 }
 
 .image-frame {
