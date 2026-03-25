@@ -29,9 +29,17 @@
             </NuxtLink>
         </div>
 
-        <div class="main-actions absolute inset-0 flex items-center justify-center gap-8 z-10 pointer-events-none" :style="{zIndex: burgerMenuOpen ? 0 : 100}">
-            <NuxtLink to="/metas" class="pointer-events-auto">All metas</NuxtLink>
-            <NuxtLink to="/quizz" class="pointer-events-auto">Quizz</NuxtLink>
+        <div class="main-actions absolute inset-0 flex items-center justify-center z-10 pointer-events-none" :style="{zIndex: burgerMenuOpen ? 0 : 100}">
+            <NuxtLink
+                to="/metas"
+                class="pointer-events-auto px-8 py-1 transition-colors h-full flex items-center"
+                :class="route.path === '/metas' ? 'bg-black text-white' : ''"
+            >All metas</NuxtLink>
+            <NuxtLink
+                to="/quizz"
+                class="pointer-events-auto px-8 py-1 transition-colors h-full flex items-center"
+                :class="route.path === '/quizz' ? 'bg-black text-white' : ''"
+            >Quizz</NuxtLink>
         </div>
 
         <div class="z-[70]  pl-4 h-full flex items-center">
@@ -43,10 +51,12 @@
 
 <script setup lang="ts">
 import { ref } from 'vue'
+import { useRoute } from 'vue-router'
 import burgerIcon from '@/assets/icons/burger.svg'
 import closeIcon from '@/assets/icons/close.svg'
 
 const burgerMenuOpen = ref(false)
+const route = useRoute()
 </script>
 
 <style scoped>

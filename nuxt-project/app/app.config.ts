@@ -8,5 +8,10 @@ export default defineAppConfig({
         secondary: '#656262', // Couleur secondaire
       },
     },
+    button: {
+      slots: {
+        base: 'rounded-none',
+      },
+    },
   },
 })
