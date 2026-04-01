@@ -1,5 +1,8 @@
 <template>
-  <div class="map-container h-full">
+  <div class="map-container h-full relative">
+    <div v-if="isLoading" class="absolute inset-0 flex items-center justify-center z-10 bg-white/60">
+      <span class="text-gray-500 text-sm font-medium">Loading...</span>
+    </div>
     <div ref="mapContainerRef" style="height: calc(100% - 30px); width: 100%;"></div>
   </div>
 </template>
@@ -11,6 +14,7 @@ import { fetchCountries } from '~/composables/useCountries'
 import { useCountryListStore } from '~/stores/countryList'
 
 const mapContainerRef = ref<HTMLDivElement | null>(null)
+const isLoading = ref(true)
 let mapRef: any = null
 let hoveredFeatureIdRef: any = null
 let lastHoveredNameRef: string | null = null
@@ -78,6 +82,7 @@ onMounted(async () => {
   mapRef = map
 
   map.on('load', () => {
+    isLoading.value = false
     ;(map as any).setPrefetchZoomDelta?.(0)
 
     map.scrollZoom.enable()
