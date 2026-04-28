@@ -18,7 +18,8 @@
                 </div>
                 <div v-else class="relative h-48 overflow-hidden">
                   <img :src="preview" alt="Prévisualisation" class="h-full w-full object-cover" />
-                  <button type="button" class="absolute right-3 top-3  bg-white/80 px-3 py-1 text-xs border-1 border-black cursor-pointer"
+                  <button type="button"
+                    class="absolute right-3 top-3  bg-white/80 px-3 py-1 text-xs border-1 border-black cursor-pointer"
                     @click.stop="resetImage">
                     clear
                   </button>
@@ -102,7 +103,7 @@ import { useAuthStore } from '~/stores/auth'
 // gestion ouverture
 import closeIcon from '@/assets/icons/close.svg'
 const onClose = () => {
- isCreating.value = false 
+  isCreating.value = false
 }
 
 const props = defineProps<{ country: { code: string; name: string } | null }>()
@@ -274,10 +275,34 @@ const renameFile = (file: File) => {
   return new File([file], newName, { type: file.type })
 }
 
+// const uploadImage = async (file: File) => {
+//   const test = await supabase.auth.getUser()
+//   console.log(test)
+//   const path = `public/${file.name}`
+//   const { error } = await supabase.storage.from('images').upload(path, file, { upsert: true })
+//   console.log('Upload result:', { error })
+//   if (error) throw error
+//   const { data } = supabase.storage.from('images').getPublicUrl(path)
+//   return data.publicUrl
+// }
 const uploadImage = async (file: File) => {
+  const { data: userData } = await supabase.auth.getUser()
+  const { data: sessionData } = await supabase.auth.getSession()
+
+  console.log("USER:", userData.user)
+  console.log("SESSION:", sessionData.session)
+
   const path = `public/${file.name}`
-  const { error } = await supabase.storage.from('images').upload(path, file, { upsert: true })
+  console.log("PATH:", path)
+
+  const { error } = await supabase.storage
+    .from('images')
+    .upload(path, file, { upsert: true })
+
+  console.log('Upload result:', { error })
+
   if (error) throw error
+
   const { data } = supabase.storage.from('images').getPublicUrl(path)
   return data.publicUrl
 }
@@ -319,6 +344,7 @@ const submit = async () => {
       country_code: countryCode.value,
       user_id: authStore.user?.id
     }
+    console.log('Submitting meta with payload:', payload)
     const { error } = await supabase.from('metas').insert(payload)
     if (error) throw error
     emit('meta-added')

@@ -64,8 +64,28 @@
                                 </button>
                             </div>
                         </div>
-                        <div class="meta-focus-media">
-                            <img :src="meta.image_url" :alt="`${resolvedTitle} image`" />
+                        <div
+                            class="meta-focus-media"
+                            :style="{ cursor: lbDragging ? 'grabbing' : lbScale > 1 ? 'grab' : 'zoom-in' }"
+                            @wheel.prevent="onLbWheel"
+                            @mousedown="onLbMouseDown"
+                            @mousemove="onLbMouseMove"
+                            @mouseup="onLbMouseUp"
+                            @mouseleave="onLbMouseUp"
+                        >
+                            <img
+                                :src="meta.image_url"
+                                :alt="`${resolvedTitle} image`"
+                                :style="{ transform: `scale(${lbScale}) translate(${lbTranslateX / lbScale}px, ${lbTranslateY / lbScale}px)`, transformOrigin: 'center center', transition: lbDragging ? 'none' : 'transform 0.15s ease' }"
+                                style="width:100%;height:100%;object-fit:cover;user-select:none;"
+                                draggable="false"
+                            />
+                            <button
+                                v-if="lbScale > 1"
+                                type="button"
+                                class="meta-focus-zoom-reset"
+                                @click.stop="lbReset"
+                            >Reset zoom</button>
                         </div>
                         <p class="meta-focus-description">{{ meta.description || '' }}</p>
                     </div>
@@ -203,12 +223,44 @@ const primaryTag = computed(() => normalizedTags.value[0] || null)
 
 const closeFocus = () => {
     isFocused.value = false
+    lbReset()
 }
 
 const handleKeyDown = (event: KeyboardEvent) => {
     if (event.key === 'Escape' && isFocused.value) {
         closeFocus()
     }
+}
+
+// ─── Lightbox zoom/pan ────────────────────────────────────────────────────────
+const lbScale = ref(1)
+const lbTranslateX = ref(0)
+const lbTranslateY = ref(0)
+const lbDragging = ref(false)
+let lbDragStart = { x: 0, y: 0, tx: 0, ty: 0 }
+
+function lbReset() {
+    lbScale.value = 1
+    lbTranslateX.value = 0
+    lbTranslateY.value = 0
+}
+function onLbWheel(e: WheelEvent) {
+    const delta = e.deltaY > 0 ? 0.9 : 1.1
+    lbScale.value = Math.min(8, Math.max(1, lbScale.value * delta))
+    if (lbScale.value === 1) { lbTranslateX.value = 0; lbTranslateY.value = 0 }
+}
+function onLbMouseDown(e: MouseEvent) {
+    if (lbScale.value <= 1) return
+    lbDragging.value = true
+    lbDragStart = { x: e.clientX, y: e.clientY, tx: lbTranslateX.value, ty: lbTranslateY.value }
+}
+function onLbMouseMove(e: MouseEvent) {
+    if (!lbDragging.value) return
+    lbTranslateX.value = lbDragStart.tx + (e.clientX - lbDragStart.x)
+    lbTranslateY.value = lbDragStart.ty + (e.clientY - lbDragStart.y)
+}
+function onLbMouseUp() {
+    lbDragging.value = false
 }
 
 onMounted(() => {
@@ -354,6 +406,7 @@ const countryLink = computed(() => {
 }
 
 .meta-focus-media {
+    position: relative;
     flex: 1 1 auto;
     display: flex;
     align-items: center;
@@ -364,10 +417,22 @@ const countryLink = computed(() => {
     min-height: 360px;
 }
 
-.meta-focus-media img {
-    width: 100%;
-    height: 100%;
-    object-fit: cover;
+.meta-focus-zoom-reset {
+    position: absolute;
+    bottom: 12px;
+    left: 50%;
+    transform: translateX(-50%);
+    font-size: 12px;
+    color: rgba(255,255,255,0.8);
+    background: rgba(0,0,0,0.45);
+    border: none;
+    border-radius: 999px;
+    padding: 4px 14px;
+    cursor: pointer;
+    transition: color 0.15s;
+}
+.meta-focus-zoom-reset:hover {
+    color: #fff;
 }
 
 .meta-focus-title {

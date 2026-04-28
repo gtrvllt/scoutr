@@ -1,5 +1,5 @@
 <template>
-  <div class="min-h-screen bg-gray-50">
+  <div class="">
     <Transition name="fade" mode="out-in">
 
       <!-- ═══════════════════ SETUP ═══════════════════ -->
@@ -83,7 +83,6 @@
                     : 'border-gray-200 hover:border-gray-400'"
                 >
                   <input type="checkbox" :value="cont.code" v-model="selectedContinents" class="sr-only" />
-                  <span class="text-base">{{ cont.flag }}</span>
                   <span class="flex-1">{{ cont.label }}</span>
                   <UIcon v-if="selectedContinents.includes(cont.code)" name="i-heroicons-check" class="w-4 h-4 text-black shrink-0" />
                 </label>
@@ -117,8 +116,7 @@
           </div>
 
           <template #footer>
-            <div class="flex justify-between items-center">
-              <span class="text-sm text-gray-400">Multiple choice · 4 options</span>
+            <div class="flex justify-between items-center flex-row-reverse">
               <UButton
                 size="lg"
                 color="neutral"
@@ -163,12 +161,14 @@
               <div :key="currentIndex" class="space-y-4">
 
                 <!-- Image -->
-                <p v-if="currentQuestion?.meta.name || currentQuestion?.meta.title" class="text-sm font-medium text-gray-700">
+                <h1 v-if="currentQuestion?.meta.name || currentQuestion?.meta.title" class="text-lg font-medium text-gray-700">
                   {{ currentQuestion?.meta.name || currentQuestion?.meta.title }}
-                </p>
+                </h1>
                 <div
-                  class="relative bg-white border border-gray-200 overflow-hidden shadow-sm"
+                  class="relative bg-white border overflow-hidden border-2 border-black group"
                   style="aspect-ratio: 16/9;"
+                  :class="currentQuestion?.meta.image_url ? 'cursor-zoom-in' : ''"
+                  @click="currentQuestion?.meta.image_url && (lightboxOpen = true)"
                 >
                   <img
                     v-if="currentQuestion?.meta.image_url"
@@ -181,6 +181,16 @@
                     <UIcon name="i-heroicons-photo" class="w-16 h-16" />
                     <span class="text-sm">Image not available</span>
                   </div>
+                  <!-- Zoom hint -->
+                  <div
+                    v-if="currentQuestion?.meta.image_url"
+                    class="absolute inset-0 flex items-center justify-center bg-black/0 group-hover:bg-black/20 transition-colors duration-200"
+                  >
+                    <UIcon
+                      name="i-heroicons-magnifying-glass-plus"
+                      class="w-8 h-8 text-white opacity-0 group-hover:opacity-100 drop-shadow transition-opacity duration-200"
+                    />
+                  </div>
                 </div>
 
                 <!-- Choices -->
@@ -188,7 +198,7 @@
                   <button
                     v-for="choice in currentQuestion?.choices"
                     :key="choice.code"
-                    class="flex items-center gap-3 px-4 py-4 border-2 text-left transition-all duration-200 font-medium text-sm"
+                    class="flex items-center gap-3 px-4 py-4 border-2 border-black text-left transition-all duration-200 font-medium text-sm"
                     :class="getChoiceClass(choice.code)"
                     :disabled="answered"
                     @click="selectAnswer(choice.code)"
@@ -315,6 +325,43 @@
       </div>
 
     </Transition>
+
+    <!-- ═══════════════════ LIGHTBOX ═══════════════════ -->
+    <Transition name="fade">
+      <div
+        v-if="lightboxOpen"
+        class="fixed inset-0 z-50 flex items-center justify-center bg-black/80 overflow-hidden"
+        :style="{ cursor: lbDragging ? 'grabbing' : lbScale > 1 ? 'grab' : 'zoom-out' }"
+        @click="lbScale === 1 && (lightboxOpen = false)"
+        @wheel.prevent="onLbWheel"
+        @mousedown="onLbMouseDown"
+        @mousemove="onLbMouseMove"
+        @mouseup="onLbMouseUp"
+        @mouseleave="onLbMouseUp"
+      >
+        <img
+          :src="currentQuestion?.meta.image_url ?? ''"
+          alt=""
+          class="max-h-full max-w-full object-contain shadow-2xl select-none"
+          :style="{ transform: `scale(${lbScale}) translate(${lbTranslateX / lbScale}px, ${lbTranslateY / lbScale}px)`, transformOrigin: 'center center', transition: lbDragging ? 'none' : 'transform 0.15s ease' }"
+          draggable="false"
+          @click="lbScale === 1 ? closeLightbox() : $event.stopPropagation()"
+        />
+        <!-- Reset zoom hint -->
+        <button
+          v-if="lbScale > 1"
+          class="absolute bottom-4 left-1/2 -translate-x-1/2 text-xs text-white/70 bg-black/40 px-3 py-1 rounded-full hover:text-white transition-colors"
+          @click.stop="lbReset"
+        >Reset zoom</button>
+        <button
+          class="absolute top-4 right-4 text-white hover:text-gray-300 transition-colors"
+          aria-label="Close"
+          @click.stop="closeLightbox"
+        >
+          <UIcon name="i-heroicons-x-mark" class="w-8 h-8" />
+        </button>
+      </div>
+    </Transition>
   </div>
 </template>
 
@@ -354,12 +401,12 @@ const SCOPE_OPTIONS = [
 ] as const
 
 const CONTINENTS_LIST = [
-  { code: 'EU', label: 'Europe', flag: '🇪🇺' },
-  { code: 'AS', label: 'Asia', flag: '🌏' },
-  { code: 'AF', label: 'Africa', flag: '🌍' },
-  { code: 'SA', label: 'South America', flag: '🌎' },
-  { code: 'NA', label: 'North America', flag: '🌎' },
-  { code: 'OC', label: 'Oceania', flag: '🌊' },
+  { code: 'EU', label: 'Europe'},
+  { code: 'AS', label: 'Asia'},
+  { code: 'AF', label: 'Africa'},
+  { code: 'SA', label: 'South America'},
+  { code: 'NA', label: 'North America'},
+  { code: 'OC', label: 'Oceania'},
 ]
 
 // ─── Store ────────────────────────────────────────────────────────────────────
@@ -371,6 +418,44 @@ const metaStore = useMetaStore()
 const quizState = ref<'setup' | 'playing' | 'results'>('setup')
 const loading = ref(false)
 const errorMsg = ref<string | null>(null)
+const lightboxOpen = ref(false)
+const lbScale = ref(1)
+const lbTranslateX = ref(0)
+const lbTranslateY = ref(0)
+const lbDragging = ref(false)
+let lbDragStart = { x: 0, y: 0, tx: 0, ty: 0 }
+
+function lbReset() {
+  lbScale.value = 1
+  lbTranslateX.value = 0
+  lbTranslateY.value = 0
+}
+function closeLightbox() {
+  lightboxOpen.value = false
+  lbReset()
+}
+function onLbWheel(e: WheelEvent) {
+  const delta = e.deltaY > 0 ? 0.9 : 1.1
+  lbScale.value = Math.min(8, Math.max(1, lbScale.value * delta))
+  if (lbScale.value === 1) { lbTranslateX.value = 0; lbTranslateY.value = 0 }
+}
+function onLbMouseDown(e: MouseEvent) {
+  if (lbScale.value <= 1) return
+  lbDragging.value = true
+  lbDragStart = { x: e.clientX, y: e.clientY, tx: lbTranslateX.value, ty: lbTranslateY.value }
+}
+function onLbMouseMove(e: MouseEvent) {
+  if (!lbDragging.value) return
+  lbTranslateX.value = lbDragStart.tx + (e.clientX - lbDragStart.x)
+  lbTranslateY.value = lbDragStart.ty + (e.clientY - lbDragStart.y)
+}
+function onLbMouseUp() {
+  lbDragging.value = false
+}
+
+const onKeydown = (e: KeyboardEvent) => { if (e.key === 'Escape') closeLightbox() }
+onMounted(() => window.addEventListener('keydown', onKeydown))
+onUnmounted(() => window.removeEventListener('keydown', onKeydown))
 
 // Config
 const questionCount = ref<number>(10)
@@ -456,7 +541,7 @@ function pick3Distractors(correctCode: string, pool: string[]): string[] {
 
 function getChoiceClass(code: string): string {
   if (!answered.value) {
-    return 'border-gray-200 hover:border-gray-900 hover:bg-gray-50 cursor-pointer text-gray-800'
+    return 'border-gray-200 hover:border-black hover:bg-gray-50 cursor-pointer text-gray-800'
   }
   if (code === currentQuestion.value?.correctCode) {
     return 'border-green-400 bg-green-50 text-green-800 cursor-default'
