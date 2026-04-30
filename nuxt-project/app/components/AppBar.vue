@@ -43,7 +43,9 @@
         </div>
 
         <div class="z-[70]  pl-4 h-full flex items-center">
-            <UserMenu />
+            <ClientOnly>
+                <UserMenu />
+            </ClientOnly>
         </div>
 
     </nav>

@@ -32,7 +32,6 @@ const props = withDefaults(defineProps<{ actions?: ActionLike[], isMetaHovered?:
 const hoveredIndex = ref<number | null>(null)
 
 const getIcon = (action?: ActionLike, index?: number) => {
-    console.log('getIcon', { action, index, hoveredIndex: hoveredIndex.value })
     if (!action) return ''
     const icon = action.icon ?? ''
     const hoverIcon = action.hoverIcon ?? icon

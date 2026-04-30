@@ -113,6 +113,26 @@
                 Select at least 4 countries
               </p>
             </section>
+
+            <!-- Tags -->
+            <section v-if="availableTags.length > 0">
+              <h2 class="text-xs font-semibold text-gray-400 uppercase tracking-widest mb-3">
+                Tags <span class="text-gray-300 normal-case font-normal">(optional)</span>
+              </h2>
+              <div class="flex flex-wrap gap-2">
+                <button
+                  v-for="tag in availableTags"
+                  :key="tag"
+                  class="px-3 py-1.5 border text-sm transition-colors"
+                  :class="selectedTags.includes(tag)
+                    ? 'bg-black text-white border-black'
+                    : 'border-gray-200 text-gray-600 hover:border-gray-400'"
+                  @click="selectedTags.includes(tag)
+                    ? selectedTags.splice(selectedTags.indexOf(tag), 1)
+                    : selectedTags.push(tag)"
+                >{{ tag }}</button>
+              </div>
+            </section>
           </div>
 
           <template #footer>
@@ -135,7 +155,7 @@
       <!-- ═══════════════════ PLAYING ═══════════════════ -->
       <div v-else-if="quizState === 'playing'" key="playing" class="min-h-screen flex flex-col bg-gray-50">
         <!-- Header -->
-        <header class="flex items-center justify-between px-6 py-3 bg-white border-b shadow-sm">
+        <header class="sticky top-[70px] z-10 flex items-center justify-between px-6 py-3 bg-white border-b shadow-sm">
           <button
             class="text-sm text-gray-400 hover:text-black transition-colors"
             @click="quizState = 'setup'"
@@ -454,7 +474,10 @@ function onLbMouseUp() {
 }
 
 const onKeydown = (e: KeyboardEvent) => { if (e.key === 'Escape') closeLightbox() }
-onMounted(() => window.addEventListener('keydown', onKeydown))
+onMounted(async () => {
+  window.addEventListener('keydown', onKeydown)
+  if (metaStore.list.length === 0) await metaStore.fetchMetas()
+})
 onUnmounted(() => window.removeEventListener('keydown', onKeydown))
 
 // Config
@@ -465,6 +488,7 @@ const customInput = ref<HTMLInputElement | null>(null)
 const scope = ref<ScopeType>('all')
 const selectedContinents = ref<string[]>([])
 const selectedCountries = ref<string[]>([])
+const selectedTags = ref<string[]>([])
 
 // Session
 const questions = ref<QuizQuestion[]>([])
@@ -477,6 +501,16 @@ const answered = ref(false)
 const effectiveCount = computed(() =>
   isCustomCount.value ? Math.max(2, Math.min(50, customCount.value || 10)) : questionCount.value
 )
+
+const availableTags = computed(() => {
+  const tagSet = new Set<string>()
+  for (const meta of metaStore.list) {
+    if (!meta.tags) continue
+    const tags = Array.isArray(meta.tags) ? meta.tags : [meta.tags]
+    tags.forEach(t => t && tagSet.add(t.trim()))
+  }
+  return [...tagSet].sort()
+})
 
 const currentQuestion = computed<QuizQuestion | undefined>(() => questions.value[currentIndex.value])
 const totalQuestions = computed(() => questions.value.length)
@@ -576,7 +610,16 @@ async function startQuiz() {
       eligibleCodes = new Set(countries.map(c => c.code))
     }
 
-    const filtered = allMetas.filter(m => m.country_code && eligibleCodes.has(m.country_code))
+    let filtered = allMetas.filter(m => m.country_code && eligibleCodes.has(m.country_code))
+
+    if (selectedTags.value.length > 0) {
+      const activeTags = selectedTags.value
+      filtered = filtered.filter(m => {
+        if (!m.tags) return false
+        const tags = Array.isArray(m.tags) ? m.tags : [m.tags]
+        return activeTags.some(t => tags.includes(t))
+      })
+    }
 
     if (filtered.length < 1) {
       errorMsg.value = 'Not enough entries available for this scope. Try a broader selection.'

@@ -25,17 +25,6 @@ import { useAuthStore } from '~/stores/auth'
 const authStore = useAuthStore()
 
 const openLogin = () => {
-    authStore.dialogMode = 'login'
-    authStore.isLoginOpen = true
-}
-
-const openSignup = () => {
-    authStore.dialogMode = 'signup'
-    authStore.isLoginOpen = true
-}
-
-const openReset = () => {
-    authStore.dialogMode = 'reset'
     authStore.isLoginOpen = true
 }
 
@@ -45,12 +34,6 @@ const loggedItems = ref<DropdownMenuItem[]>([
         icon: 'i-lucide-log-out',
         onSelect: () => { authStore.logout() }
     }
-])
-
-const items = ref<DropdownMenuItem[]>([
-    { label: 'Connexion', icon: 'i-lucide-user', onSelect: openLogin },
-    { label: 'Créer un compte', icon: 'i-lucide-user-plus', onSelect: openSignup },
-    { label: 'Mot de passe oublié', icon: 'i-lucide-key', onSelect: openReset }
 ])
 </script>
 

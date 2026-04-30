@@ -69,14 +69,22 @@
             :style="{ width: isCreating ? 'calc(100% - 48px)' : '100%', margin: isCreating ? '24px' : '0' }"
             @click="onSubmit">
 
-            {{ isCreating ? 'Add the meta' : 'Add a meta' }}
+            {{ submitting ? 'Saving…' : isCreating ? 'Add the meta' : 'Add a meta' }}
             <span class="ml-3 flex items-center justify-center">
-              <svg v-if="!isCreating" width="21" height="20" viewBox="0 0 21 20" xmlns="http://www.w3.org/2000/svg"
+              <!-- spinner -->
+              <svg v-if="submitting" width="20" height="20" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg"
+                class="animate-spin">
+                <circle cx="10" cy="10" r="8" stroke="currentColor" stroke-width="2" fill="none" stroke-opacity="0.25" />
+                <path d="M10 2a8 8 0 0 1 8 8" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round" />
+              </svg>
+              <!-- plus -->
+              <svg v-else-if="!isCreating" width="21" height="20" viewBox="0 0 21 20" xmlns="http://www.w3.org/2000/svg"
                 class="transition group-hover:text-white">
                 <path
                   d="M10.5 0C4.989 0 0.5 4.489 0.5 10C0.5 15.511 4.989 20 10.5 20C16.011 20 20.5 15.511 20.5 10C20.5 4.489 16.011 0 10.5 0ZM10.5 2C14.9301 2 18.5 5.56988 18.5 10C18.5 14.4301 14.9301 18 10.5 18C6.06988 18 2.5 14.4301 2.5 10C2.5 5.56988 6.06988 2 10.5 2ZM9.5 5V9H5.5V11H9.5V15H11.5V11H15.5V9H11.5V5H9.5Z"
                   fill="currentColor" />
               </svg>
+              <!-- check -->
               <svg v-else width="21" height="20" viewBox="0 0 21 20" xmlns="http://www.w3.org/2000/svg"
                 class="transition group-hover:text-white">
                 <circle cx="10.5" cy="10" r="9" stroke="currentColor" stroke-width="2" fill="none" />
@@ -106,8 +114,10 @@ const onClose = () => {
   isCreating.value = false
 }
 
+import type { Meta } from '@/types/meta'
+
 const props = defineProps<{ country: { code: string; name: string } | null }>()
-const emit = defineEmits<{ (e: 'meta-added'): void }>()
+const emit = defineEmits<{ (e: 'meta-added', meta: Meta): void }>()
 
 const supabase = useSupabaseClient()
 const authStore = useAuthStore()
@@ -275,31 +285,15 @@ const renameFile = (file: File) => {
   return new File([file], newName, { type: file.type })
 }
 
-// const uploadImage = async (file: File) => {
-//   const test = await supabase.auth.getUser()
-//   console.log(test)
-//   const path = `public/${file.name}`
-//   const { error } = await supabase.storage.from('images').upload(path, file, { upsert: true })
-//   console.log('Upload result:', { error })
-//   if (error) throw error
-//   const { data } = supabase.storage.from('images').getPublicUrl(path)
-//   return data.publicUrl
-// }
-const uploadImage = async (file: File) => {
-  const { data: userData } = await supabase.auth.getUser()
-  const { data: sessionData } = await supabase.auth.getSession()
 
-  console.log("USER:", userData.user)
-  console.log("SESSION:", sessionData.session)
+const uploadImage = async (file: File) => {
+  if (!authStore.user) throw new Error('Non authentifié')
 
   const path = `public/${file.name}`
-  console.log("PATH:", path)
 
   const { error } = await supabase.storage
     .from('images')
-    .upload(path, file, { upsert: true })
-
-  console.log('Upload result:', { error })
+    .upload(path, file)
 
   if (error) throw error
 
@@ -323,7 +317,6 @@ const ensureAccess = () => {
     return false
   }
   if (!authStore.isLogged) {
-    authStore.dialogMode = 'login'
     authStore.isLoginOpen = true
     return false
   }
@@ -344,10 +337,9 @@ const submit = async () => {
       country_code: countryCode.value,
       user_id: authStore.user?.id
     }
-    console.log('Submitting meta with payload:', payload)
-    const { error } = await supabase.from('metas').insert(payload)
+    const { data, error } = await supabase.from('metas').insert(payload).select().single()
     if (error) throw error
-    emit('meta-added')
+    emit('meta-added', data as Meta)
     resetForm()
     isCreating.value = false
   } catch (err: any) {

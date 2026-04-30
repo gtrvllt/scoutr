@@ -1,15 +1,7 @@
 <template>
   <section class="space-y-8">
     <div class="tags-container">
-      <Transition name="fade">
-        <div v-if="isAddFormOpen" class="mt-6">
-          <AddMeta v-model:open="isAddFormOpen" :country="country" @meta-added="handleMetaAdded">
-            <template #actions>
-              <UButton variant="ghost" @click="isAddFormOpen = false">Fermer</UButton>
-            </template>
-          </AddMeta>
-        </div>
-      </Transition>
+      <AddMeta :country="country.code && country.name ? { code: country.code, name: country.name } : null" @meta-added="handleMetaAdded" />
 
       <div v-if="tagNames.length" class="mt-6 flex flex-wrap gap-3">
         <button v-for="tag in tagNames" :key="tag" class="tag-button overflow-hidden"
@@ -46,7 +38,7 @@ import type { Meta } from '@/types/meta'
 import { useSupabaseClient } from '~/lib/supabase.client'
 import { useAuthStore } from '~/stores/auth'
 
-const props = defineProps<{ country: { code: string |null } }>()
+const props = defineProps<{ country: { code: string | null; name?: string } }>()
 
 const supabase = useSupabaseClient()
 const toast = useToast()
@@ -75,7 +67,6 @@ const refresh = async () => {
       metasQuery.order('id', { ascending: false }),
       tagsQuery.order('name'),
     ])
-    console.log('ABC metasres', metasRes)
     if (metasRes.error) throw metasRes.error
     if (tagsRes.error) throw tagsRes.error
     metas.value = metasRes.data ?? []
@@ -150,14 +141,17 @@ const handleMetaError = (message: string) => {
   toast.add({ title: 'Action impossible', description: message, color: 'red' })
 }
 
-const handleMetaAdded = async () => {
-  await refresh()
+const handleMetaAdded = (meta: Meta) => {
+  metas.value.unshift(meta)
+  if (meta.tags) {
+    const tags = Array.isArray(meta.tags) ? meta.tags : [meta.tags]
+    tags.forEach(tag => { if (!tagNames.value.includes(tag)) tagNames.value.push(tag) })
+  }
   isAddFormOpen.value = false
 }
 
 const toggleAddMeta = () => {
   if (!authStore.isLogged) {
-    authStore.dialogMode = 'login'
     authStore.isLoginOpen = true
     return
   }
