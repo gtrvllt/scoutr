@@ -3,6 +3,20 @@ import { ref, computed } from 'vue'
 import type { Meta } from '@/types/meta'
 import { fetchMetas as apiFetchMetas, fetchMetaById as apiFetchMetaById } from '~/lib/supabase.api'
 
+function normalizeTags(tags: Meta['tags']): string[] {
+  if (!tags) return []
+  if (Array.isArray(tags)) return tags
+  try {
+    const parsed = JSON.parse(tags)
+    if (Array.isArray(parsed)) return parsed
+  } catch {}
+  return tags.split(',').map(t => t.trim()).filter(Boolean)
+}
+
+function normalize(m: Meta): Meta {
+  return { ...m, tags: normalizeTags(m.tags) }
+}
+
 export const useMetaStore = defineStore('meta', () => {
   const items = ref<Record<string, Meta>>({})
   const loading = ref(false)
@@ -12,11 +26,11 @@ export const useMetaStore = defineStore('meta', () => {
 
   function setMetas(metas: Meta[]) {
     items.value = {}
-    metas.forEach(m => { items.value[m.id] = m })
+    metas.forEach(m => { items.value[m.id] = normalize(m) })
   }
 
   function addMeta(m: Meta) {
-    items.value[m.id] = m
+    items.value[m.id] = normalize(m)
   }
 
   function updateMetaLocal(id: string, patch: Partial<Meta>) {

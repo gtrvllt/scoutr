@@ -1,7 +1,8 @@
 {
   "permissions": {
     "allow": [
-      "Bash(git -C /d/PROJETS/scoutr log --oneline -10)"
+      "Bash(git -C /d/PROJETS/scoutr log --oneline -10)",
+      "PowerShell(gh pr list)"
     ]
   }
 }

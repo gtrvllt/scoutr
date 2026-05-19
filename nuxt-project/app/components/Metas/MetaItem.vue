@@ -32,11 +32,6 @@
             <p class="text-base leading-relaxed text-neutral-700">
                 {{ meta.description || '' }}
             </p>
-            <!-- <div class="flex flex-wrap gap-2 text-xs font-semibold uppercase tracking-[0.4em] text-neutral-500">
-                <span v-for="tag in normalizedTags" :key="tag" class="rounded-full border border-neutral-200 px-3 py-1">
-                    {{ tag }}
-                </span>
-            </div> -->
         </div>
         <div class="meta-map" aria-hidden="true"></div>
     </div>
@@ -47,9 +42,6 @@
             <div v-if="isFocused" class="meta-focus-overlay" role="dialog" aria-modal="true"
                 :aria-label="`${resolvedTitle} details`" @click.self="closeFocus">
                 <div class="meta-focus-card">
-                    <!-- <button type="button" class="meta-focus-close" @click="closeFocus" aria-label="Fermer">
-                        <UIcon name="i-lucide-x" class="h-6 w-6" />
-                    </button> -->
                     <div class="meta-focus-body">
                         <div class="meta-focus-header">
                             <h2 class="meta-focus-title">{{ resolvedTitle }}</h2>
@@ -96,9 +88,18 @@
 </template>
 
 <script setup lang="ts">
-import { Teleport, computed, reactive, ref, onBeforeUnmount, onMounted, watch } from 'vue'
+import { computed, reactive, ref, onBeforeUnmount, onMounted, watch } from 'vue'
 import { useRoute } from 'vue-router'
 import type { Meta } from '@/types/meta'
+import { useAuthStore } from '~/stores/auth'
+import { deleteMeta as apiDeleteMeta } from '~/lib/supabase.api'
+import expandIcon from '@/assets/icons/expand.svg'
+import hoverExpandIcon from '@/assets/icons/expanding.svg'
+import editIcon from '@/assets/icons/edit.svg'
+import hoverEditIcon from '@/assets/icons/editing.svg'
+import trashIcon from '@/assets/icons/trash.svg'
+import hoverTrashIcon from '@/assets/icons/trashOpen.svg'
+import PictoRow from './PictoRow.vue'
 
 const props = defineProps<{ meta: Meta }>()
 const route = useRoute()
@@ -108,22 +109,9 @@ const emit = defineEmits<{
     (e: 'error', message: string): void
 }>()
 
-// auth helper to know if actions should be visible
-import { useAuthStore } from '~/stores/auth'
-import { useSupabaseClient } from '~/lib/supabase.client'
 const authStore = useAuthStore()
 const isLogged = computed(() => authStore.isLogged)
-const supabase = useSupabaseClient()
 const toast = useToast()
-
-///// gestion des icones d'actions
-import expandIcon from '@/assets/icons/expand.svg'
-import hoverExpandIcon from '@/assets/icons/expanding.svg'
-import editIcon from '@/assets/icons/edit.svg'
-import hoverEditIcon from '@/assets/icons/editing.svg'
-import trashIcon from '@/assets/icons/trash.svg'
-import hoverTrashIcon from '@/assets/icons/trashOpen.svg'
-import PictoRow from './PictoRow.vue'
 
 
 type Action = {
@@ -165,7 +153,7 @@ const onDeleteMeta = async () => {
     if (!confirmed) return
     try {
         isDeleting.value = true
-        const { error } = await supabase.from('metas').delete().eq('id', props.meta.id)
+        const { error } = await apiDeleteMeta(props.meta.id)
         if (error) throw error
         toast.add({ title: 'Méta supprimée', description: `${resolvedTitle.value} a été retirée.`, color: 'green' })
         emit('deleted', props.meta.id)

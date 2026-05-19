@@ -127,9 +127,7 @@
                   :class="selectedTags.includes(tag)
                     ? 'bg-black text-white border-black'
                     : 'border-gray-200 text-gray-600 hover:border-gray-400'"
-                  @click="selectedTags.includes(tag)
-                    ? selectedTags.splice(selectedTags.indexOf(tag), 1)
-                    : selectedTags.push(tag)"
+                  @click="toggleTag(tag)"
                 >{{ tag }}</button>
               </div>
             </section>
@@ -188,7 +186,7 @@
                   class="relative bg-white border overflow-hidden border-2 border-black group"
                   style="aspect-ratio: 16/9;"
                   :class="currentQuestion?.meta.image_url ? 'cursor-zoom-in' : ''"
-                  @click="currentQuestion?.meta.image_url && (lightboxOpen = true)"
+                  @click="currentQuestion?.meta.image_url && (lightboxUrl = currentQuestion.meta.image_url, lightboxOpen = true)"
                 >
                   <img
                     v-if="currentQuestion?.meta.image_url"
@@ -308,12 +306,16 @@
               class="flex items-center gap-3 py-3 first:pt-0 last:pb-0"
             >
               <span class="text-lg w-6 text-center shrink-0">{{ q.isCorrect ? '✅' : '❌' }}</span>
-              <div class="w-14 h-10 overflow-hidden shrink-0 bg-gray-100">
+              <div
+                class="w-14 h-10 overflow-hidden shrink-0 bg-gray-100"
+                :class="q.meta.image_url ? 'cursor-zoom-in' : ''"
+                @click="q.meta.image_url && (lightboxUrl = q.meta.image_url, lightboxOpen = true)"
+              >
                 <img
                   v-if="q.meta.image_url"
                   :src="q.meta.image_url"
                   alt=""
-                  class="w-full h-full object-cover"
+                  class="w-full h-full object-cover hover:opacity-80 transition-opacity"
                 />
               </div>
               <div class="flex-1 min-w-0">
@@ -352,7 +354,7 @@
         v-if="lightboxOpen"
         class="fixed inset-0 z-50 flex items-center justify-center bg-black/80 overflow-hidden"
         :style="{ cursor: lbDragging ? 'grabbing' : lbScale > 1 ? 'grab' : 'zoom-out' }"
-        @click="lbScale === 1 && (lightboxOpen = false)"
+        @click="onLbOverlayClick"
         @wheel.prevent="onLbWheel"
         @mousedown="onLbMouseDown"
         @mousemove="onLbMouseMove"
@@ -360,7 +362,7 @@
         @mouseleave="onLbMouseUp"
       >
         <img
-          :src="currentQuestion?.meta.image_url ?? ''"
+          :src="lightboxUrl"
           alt=""
           class="max-h-full max-w-full object-contain shadow-2xl select-none"
           :style="{ transform: `scale(${lbScale}) translate(${lbTranslateX / lbScale}px, ${lbTranslateY / lbScale}px)`, transformOrigin: 'center center', transition: lbDragging ? 'none' : 'transform 0.15s ease' }"
@@ -439,11 +441,13 @@ const quizState = ref<'setup' | 'playing' | 'results'>('setup')
 const loading = ref(false)
 const errorMsg = ref<string | null>(null)
 const lightboxOpen = ref(false)
+const lightboxUrl = ref('')
 const lbScale = ref(1)
 const lbTranslateX = ref(0)
 const lbTranslateY = ref(0)
 const lbDragging = ref(false)
 let lbDragStart = { x: 0, y: 0, tx: 0, ty: 0 }
+let lbHadDrag = false
 
 function lbReset() {
   lbScale.value = 1
@@ -454,6 +458,10 @@ function closeLightbox() {
   lightboxOpen.value = false
   lbReset()
 }
+function onLbOverlayClick() {
+  if (lbHadDrag) { lbHadDrag = false; return }
+  closeLightbox()
+}
 function onLbWheel(e: WheelEvent) {
   const delta = e.deltaY > 0 ? 0.9 : 1.1
   lbScale.value = Math.min(8, Math.max(1, lbScale.value * delta))
@@ -462,10 +470,12 @@ function onLbWheel(e: WheelEvent) {
 function onLbMouseDown(e: MouseEvent) {
   if (lbScale.value <= 1) return
   lbDragging.value = true
+  lbHadDrag = false
   lbDragStart = { x: e.clientX, y: e.clientY, tx: lbTranslateX.value, ty: lbTranslateY.value }
 }
 function onLbMouseMove(e: MouseEvent) {
   if (!lbDragging.value) return
+  lbHadDrag = true
   lbTranslateX.value = lbDragStart.tx + (e.clientX - lbDragStart.x)
   lbTranslateY.value = lbDragStart.ty + (e.clientY - lbDragStart.y)
 }
@@ -489,6 +499,12 @@ const scope = ref<ScopeType>('all')
 const selectedContinents = ref<string[]>([])
 const selectedCountries = ref<string[]>([])
 const selectedTags = ref<string[]>([])
+
+function toggleTag(tag: string) {
+  const idx = selectedTags.value.indexOf(tag)
+  if (idx >= 0) selectedTags.value.splice(idx, 1)
+  else selectedTags.value.push(tag)
+}
 
 // Session
 const questions = ref<QuizQuestion[]>([])

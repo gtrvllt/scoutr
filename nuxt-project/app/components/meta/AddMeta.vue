@@ -106,9 +106,7 @@
 import { computed, reactive, ref, watch } from 'vue'
 import { useSupabaseClient } from '~/lib/supabase.client'
 import { useAuthStore } from '~/stores/auth'
-
-
-// gestion ouverture
+import { createMeta as apiCreateMeta } from '~/lib/supabase.api'
 import closeIcon from '@/assets/icons/close.svg'
 const onClose = () => {
   isCreating.value = false
@@ -337,7 +335,7 @@ const submit = async () => {
       country_code: countryCode.value,
       user_id: authStore.user?.id
     }
-    const { data, error } = await supabase.from('metas').insert(payload).select().single()
+    const { data, error } = await apiCreateMeta(payload)
     if (error) throw error
     emit('meta-added', data as Meta)
     resetForm()
