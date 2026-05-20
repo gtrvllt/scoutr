@@ -43,4 +43,8 @@ export default defineNuxtConfig({
   },
 
   modules: ['@nuxt/ui', '@nuxt/icon', '@pinia/nuxt', 'motion-v/nuxt'],
+
+  colorMode: {
+    preference: 'light',
+  },
 })
