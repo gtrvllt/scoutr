@@ -35,11 +35,11 @@ export default defineNuxtConfig({
 
   runtimeConfig: {
     public: {
-      SUPABASE_URL: process.env.NUXT_PUBLIC_SUPABASE_URL,
-      SUPABASE_ANON_KEY: process.env.NUXT_PUBLIC_SUPABASE_ANON_KEY,
-      NUXT_PUBLIC_MAPBOX_TOKEN: process.env.NUXT_PUBLIC_MAPBOX_TOKEN,
+      SUPABASE_URL: '',
+      SUPABASE_ANON_KEY: '',
+      MAPBOX_TOKEN: '',
     },
-    SUPABASE_SERVICE_ROLE_KEY: process.env.SUPABASE_SERVICE_ROLE_KEY,
+    SUPABASE_SERVICE_ROLE_KEY: '',
   },
 
   modules: ['@nuxt/ui', '@nuxt/icon', '@pinia/nuxt', 'motion-v/nuxt'],

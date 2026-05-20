@@ -28,11 +28,11 @@ const countryListStore = useCountryListStore()
 
 onMounted(async () => {
   const config = useRuntimeConfig()
-  const token = config.public.NUXT_PUBLIC_MAPBOX_TOKEN as string | undefined
+  const token = config.public.MAPBOX_TOKEN as string | undefined
 
   const mapboxgl = (await import('mapbox-gl')).default
   if (!token) {
-    console.error('NUXT_PUBLIC_MAPBOX_TOKEN missing. Set it in nuxt-project/.env and runtimeConfig.')
+    console.error('MAPBOX_TOKEN missing. Set NUXT_PUBLIC_MAPBOX_TOKEN in .env')
   }
   mapboxgl.accessToken = token || ''
 
@@ -62,14 +62,9 @@ onMounted(async () => {
 
   if (!geojsonData || !mapContainerRef.value) return
 
-  const styleOrEmpty =
-    process.env.NUXT_PUBLIC_MAPBOX_NO_BASEMAP === 'true'
-      ? ({ version: 8, sources: {}, layers: [] } as any)
-      : ('mapbox://styles/mapbox/light-v11' as any)
-
   const map = new (mapboxgl as any).Map({
     container: mapContainerRef.value,
-    style: styleOrEmpty,
+    style: 'mapbox://styles/mapbox/light-v11',
     center: [0, 20],
     zoom: 2,
     renderWorldCopies: false,

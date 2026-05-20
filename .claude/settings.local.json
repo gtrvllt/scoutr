@@ -2,7 +2,11 @@
   "permissions": {
     "allow": [
       "Bash(git -C /d/PROJETS/scoutr log --oneline -10)",
-      "PowerShell(gh pr list)"
+      "PowerShell(gh pr list)",
+      "Bash(git rm *)",
+      "Bash(cp -r d:/PROJETS/scoutr/nuxt-project/app d:/PROJETS/scoutr/)",
+      "Bash(cp -r d:/PROJETS/scoutr/nuxt-project/public d:/PROJETS/scoutr/)",
+      "Bash(git add *)"
     ]
   }
 }
