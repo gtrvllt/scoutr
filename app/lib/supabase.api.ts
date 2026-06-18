@@ -8,7 +8,7 @@ type Result<T = any> = { data: T | null; error: PostgrestError | null }
 function getClient(token?: string) {
   if (!token) return useSupabaseClient()
   const config = useRuntimeConfig()
-  return createClient(config.public.SUPABASE_URL, config.public.SUPABASE_ANON_KEY, {
+  return createClient(config.public.supabaseUrl, config.public.supabaseAnonKey, {
     global: { headers: { Authorization: `Bearer ${token}` } },
   })
 }

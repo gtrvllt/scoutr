@@ -28,7 +28,7 @@ const countryListStore = useCountryListStore()
 
 onMounted(async () => {
   const config = useRuntimeConfig()
-  const token = config.public.MAPBOX_TOKEN as string | undefined
+  const token = config.public.mapboxToken as string | undefined
 
   const mapboxgl = (await import('mapbox-gl')).default
   if (!token) {

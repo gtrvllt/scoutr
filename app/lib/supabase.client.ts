@@ -6,8 +6,8 @@ export const useSupabaseClient = (): SupabaseClient => {
   if (client) return client
 
   const config = useRuntimeConfig()
-  const url = config.public.SUPABASE_URL
-  const key = config.public.SUPABASE_ANON_KEY
+  const url = config.public.supabaseUrl
+  const key = config.public.supabaseAnonKey
 
   if (!url || !key) {
     throw new Error('Supabase URL or anon key is missing in runtime config')
