@@ -11,7 +11,7 @@
               <line x1="12.5" y1="12.5" x2="17" y2="17" stroke="currentColor" stroke-width="1.5"
                 stroke-linecap="round" />
             </svg>
-            <input :id="searchInputId" v-model="search" type="search" autocomplete="off" placeholder="search"
+            <input ref="searchInputRef" :id="searchInputId" v-model="search" type="search" autocomplete="off" placeholder="search"
               class="country-list-search-input" />
           </div>
         </div>
@@ -39,7 +39,7 @@
   </div>
 </template>
 <script setup lang="ts">
-import { computed, onBeforeUnmount, onMounted, ref, watch } from 'vue'
+import { computed, nextTick, onBeforeUnmount, onMounted, ref, watch } from 'vue'
 import toggleIcon from '../assets/icons/toggle.svg?url'
 import { countries, type CountryEntry } from '~/data/countries'
 import { useCountryListStore } from '~/stores/countryList'
@@ -50,6 +50,7 @@ const isCountryListOpen = computed(() => countryListStore.isCountryListOpen)
 const search = ref('')
 const panelRef = ref<HTMLElement | null>(null)
 const toggleButtonRef = ref<HTMLElement | null>(null)
+const searchInputRef = ref<HTMLInputElement | null>(null)
 
 const filteredCountries = computed<CountryEntry[]>(() => {
   const term = search.value.trim().toLowerCase()
@@ -60,7 +61,9 @@ const filteredCountries = computed<CountryEntry[]>(() => {
 })
 
 watch(isCountryListOpen, (open) => {
-  if (!open) {
+  if (open) {
+    nextTick(() => searchInputRef.value?.focus())
+  } else {
     search.value = ''
   }
 })
@@ -222,7 +225,7 @@ const handlePanelClick = () => {
   position: absolute;
   top: 50%;
   transform: translateY(-50%);
-  /* left: calc(var(--drawer-closed-width) - 2px); */
+  left: 0;
   background: black;
   border: none;
   width: 58px;
@@ -231,7 +234,13 @@ const handlePanelClick = () => {
   align-items: center;
   justify-content: center;
   cursor: pointer;
-  transition: left 260ms ease, background 220ms ease;
+  opacity: 0.3;
+  transition: left 260ms ease, background 220ms ease, opacity 150ms ease;
+}
+
+.country-list-toggle:hover,
+.country-list-toggle.open {
+  opacity: 1;
 }
 
 .country-list-toggle-icon.white-icon {

@@ -392,8 +392,6 @@ import { countries } from '~/data/countries'
 import type { Meta } from '~/types/meta'
 import { useMetaStore } from '~/stores/meta'
 
-definePageMeta({ layout: 'default' })
-
 // ─── Types ────────────────────────────────────────────────────────────────────
 
 type ScopeType = 'all' | 'continents' | 'countries'

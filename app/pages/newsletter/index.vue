@@ -8,6 +8,20 @@
     </p>
     <div class="border-l-4 border-black p-6 flex flex-col gap-4 bg-white">
 
+      <!-- 18 juin 2026 -->
+      <div class="gap-3 mt-2">
+        <h2 class="text-2xl font-bold">18 juin 2026</h2>
+        <h3 class="text-xl font-semibold text-gray-800">Mises à jour</h3>
+        <ul class="list-disc pl-6 mt-2 text-gray-700">
+          <li>Correction du chargement des variables d'environnement Supabase et Mapbox</li>
+          <li>Focus automatique sur la barre de recherche à l'ouverture de la country list</li>
+          <li>Ajout de 16 pays manquants dans la liste GeoGuessr : Inde, Vietnam, Népal, Chine, Géorgie, Arménie, Maroc, Égypte, Tunisie, Rwanda, Ouganda, Tanzanie, Madagascar, Zimbabwe, Costa Rica, Paraguay</li>
+        </ul>
+        <p class="mt-4 text-gray-700">
+          <em><strong>La base de données a été entièrement vidée en préparation d'un beta test qui arrive très prochainement. 🎉</strong></em>
+        </p>
+      </div>
+
       <!-- 30 avril 2026 -->
       <div class="gap-3 mt-2">
         <h2 class="text-2xl font-bold">30 avril 2026</h2>
