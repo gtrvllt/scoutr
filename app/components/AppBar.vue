@@ -5,9 +5,9 @@
             class="z-[70] p-2  relative cursor-pointer focus:outline-none">
             <img :src="burgerMenuOpen ? closeIcon : burgerIcon" alt="Menu" class="h-6 w-6" />
         </button>
-        <div class="flex items-center h-full z-50  flex-1 transition-all duration-500">
+        <div class="flex items-center h-full z-50 flex-1 transition-all duration-500">
 
-            <div class="menu-actions flex items-center justify-center gap-6 overflow-hidden transition-all duration-500 ease-in-out h-full "
+            <div class="menu-actions flex items-center justify-center gap-6 overflow-hidden transition-all duration-500 ease-in-out h-full bg-white"
                 :class="burgerMenuOpen ? 'flex-1 opacity-100 px-8' : 'w-0 opacity-1 px-0'">
                 <NuxtLink to="/newsletter"
                     class="text-base whitespace-nowrap h-full items-center flex hover:bg-black hover:text-white px-4">

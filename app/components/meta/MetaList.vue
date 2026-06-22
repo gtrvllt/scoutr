@@ -1,7 +1,7 @@
 <template>
   <section class="space-y-8">
     <div class="tags-container">
-      <AddMeta :country="country.code && country.name ? { code: country.code, name: country.name } : null" @meta-added="handleMetaAdded" />
+      <AddMeta v-if="country.code" :country="country.code && country.name ? { code: country.code, name: country.name } : null" @meta-added="handleMetaAdded" />
 
       <div v-if="tagNames.length" class="mt-6 flex flex-wrap gap-3">
         <button v-for="tag in tagNames" :key="tag" class="tag-button overflow-hidden"

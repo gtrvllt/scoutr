@@ -6,7 +6,11 @@
       "Bash(git rm *)",
       "Bash(cp -r d:/PROJETS/scoutr/nuxt-project/app d:/PROJETS/scoutr/)",
       "Bash(cp -r d:/PROJETS/scoutr/nuxt-project/public d:/PROJETS/scoutr/)",
-      "Bash(git add *)"
+      "Bash(git add *)",
+      "mcp__898875f6-28ec-4b4e-b49d-27834d61499d__get_project",
+      "mcp__d4bd3a92-82ee-4bac-b2b8-21b3ab77ca20__list_teams",
+      "mcp__d4bd3a92-82ee-4bac-b2b8-21b3ab77ca20__get_project",
+      "mcp__898875f6-28ec-4b4e-b49d-27834d61499d__apply_migration"
     ]
   }
 }

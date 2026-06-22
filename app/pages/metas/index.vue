@@ -12,9 +12,7 @@
             </li>
         </ul> -->
         <div class="all-metas-container">
-            <h1>meta list</h1>
             <MetaList :country="{ code: null }" />
-
         </div>
         <!-- </ul> -->
     </div>

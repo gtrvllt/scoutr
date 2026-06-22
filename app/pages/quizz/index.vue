@@ -20,6 +20,28 @@
         <UCard class="shadow-sm">
           <div class="space-y-8 p-1">
 
+            <!-- Meta source -->
+            <section>
+              <h2 class="text-xs font-semibold text-gray-400 uppercase tracking-widest mb-3">
+                Meta source
+              </h2>
+              <div class="flex gap-2">
+                <button
+                  class="px-4 py-2 border font-medium text-sm transition-colors"
+                  :class="!onlyMyMetas ? 'bg-black text-white border-black' : 'border-gray-200 text-gray-700 hover:border-gray-400'"
+                  @click="onlyMyMetas = false"
+                >Discover other players' metas</button>
+                <button
+                  class="px-4 py-2 border font-medium text-sm transition-colors"
+                  :class="onlyMyMetas ? 'bg-black text-white border-black' : 'border-gray-200 text-gray-700 hover:border-gray-400'"
+                  :disabled="!authStore.isLogged"
+                  :title="!authStore.isLogged ? 'Sign in to use your own metas' : ''"
+                  @click="onlyMyMetas = true"
+                >Only my metas</button>
+              </div>
+              <p v-if="!authStore.isLogged" class="text-xs text-gray-400 mt-2">Sign in to use only your own metas</p>
+            </section>
+
             <!-- Number of questions -->
             <section>
               <h2 class="text-xs font-semibold text-gray-400 uppercase tracking-widest mb-3">
@@ -261,6 +283,13 @@
                       </p>
                     </div>
 
+                    <!-- Rating -->
+                    <StarRating
+                      v-if="currentQuestion?.meta.id"
+                      :meta-id="currentQuestion.meta.id"
+                      :is-logged-in="authStore.isLogged"
+                    />
+
                     <!-- Navigation -->
                     <div class="flex justify-end">
                       <UButton
@@ -389,6 +418,7 @@
 
 <script setup lang="ts">
 import { countries } from '~/data/countries'
+import { useAuthStore } from '~/stores/auth'
 import type { Meta } from '~/types/meta'
 import { useMetaStore } from '~/stores/meta'
 
@@ -435,6 +465,8 @@ const metaStore = useMetaStore()
 
 // ─── State ────────────────────────────────────────────────────────────────────
 
+const authStore = useAuthStore()
+const onlyMyMetas = ref(false)
 const quizState = ref<'setup' | 'playing' | 'results'>('setup')
 const loading = ref(false)
 const errorMsg = ref<string | null>(null)
@@ -625,6 +657,10 @@ async function startQuiz() {
     }
 
     let filtered = allMetas.filter(m => m.country_code && eligibleCodes.has(m.country_code))
+
+    if (onlyMyMetas.value && authStore.user?.id) {
+      filtered = filtered.filter(m => m.user_id === authStore.user!.id)
+    }
 
     if (selectedTags.value.length > 0) {
       const activeTags = selectedTags.value

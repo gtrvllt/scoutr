@@ -44,6 +44,16 @@ export async function updateMeta(id: string | number, data: Record<string, any>,
   return { data: res.data ?? null, error: res.error ?? null }
 }
 
+export async function upsertMetaRating(metaId: string, rating: number, token?: string): Promise<Result> {
+  const supabase = getClient(token)
+  const res = await supabase
+    .from('meta_ratings')
+    .upsert({ meta_id: metaId, rating }, { onConflict: 'meta_id,user_id' })
+    .select()
+    .single()
+  return { data: res.data ?? null, error: res.error ?? null }
+}
+
 export async function deleteMeta(id: string | number, token?: string): Promise<Result> {
   const supabase = getClient(token)
   const res = await supabase.from('metas').delete().eq('id', id).select().single()
