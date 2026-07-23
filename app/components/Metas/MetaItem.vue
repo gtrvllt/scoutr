@@ -44,42 +44,111 @@
                 <div class="meta-focus-card">
                     <div class="meta-focus-body">
                         <div class="meta-focus-header">
-                            <h2 class="meta-focus-title">{{ resolvedTitle }}</h2>
+                            <h2 class="meta-focus-title">{{ isEditing ? 'Edit meta' : resolvedTitle }}</h2>
                             <div class="meta-focus-actions">
-                                <button v-for="action in focusActions" :key="`${action.label}-focus`" type="button"
-                                    :aria-label="action.label" class="meta-focus-action" :disabled="action.disabled"
-                                    :aria-disabled="action.disabled" @click.stop="!action.disabled && action.action()">
-                                    <img :src="getIcon(action)" alt="" />
-                                </button>
+                                <template v-if="!isEditing">
+                                    <button v-for="action in focusActions" :key="`${action.label}-focus`" type="button"
+                                        :aria-label="action.label" class="meta-focus-action" :disabled="action.disabled"
+                                        :aria-disabled="action.disabled" @click.stop="!action.disabled && action.action()">
+                                        <img :src="getIcon(action)" alt="" />
+                                    </button>
+                                </template>
                                 <button type="button" class="meta-focus-close" @click="closeFocus" aria-label="Fermer">
                                     <UIcon name="i-lucide-x" class="cursor-pointer size-6" />
                                 </button>
                             </div>
                         </div>
-                        <div
-                            class="meta-focus-media"
-                            :style="{ cursor: lbDragging ? 'grabbing' : lbScale > 1 ? 'grab' : 'zoom-in' }"
-                            @wheel.prevent="onLbWheel"
-                            @mousedown="onLbMouseDown"
-                            @mousemove="onLbMouseMove"
-                            @mouseup="onLbMouseUp"
-                            @mouseleave="onLbMouseUp"
-                        >
-                            <img
-                                :src="meta.image_url"
-                                :alt="`${resolvedTitle} image`"
-                                :style="{ transform: `scale(${lbScale}) translate(${lbTranslateX / lbScale}px, ${lbTranslateY / lbScale}px)`, transformOrigin: 'center center', transition: lbDragging ? 'none' : 'transform 0.15s ease' }"
-                                style="width:100%;height:100%;object-fit:cover;user-select:none;"
-                                draggable="false"
-                            />
-                            <button
-                                v-if="lbScale > 1"
-                                type="button"
-                                class="meta-focus-zoom-reset"
-                                @click.stop="lbReset"
-                            >Reset zoom</button>
-                        </div>
-                        <p class="meta-focus-description">{{ meta.description || '' }}</p>
+
+                        <!-- Edit form -->
+                        <template v-if="isEditing">
+                            <div class="edit-image-panel border-2 border-black cursor-pointer" @dragover.prevent @drop.prevent="onEditDrop">
+                                <input ref="editFileInput" type="file" accept="image/*" class="hidden" @change="onEditFileChange" />
+                                <div class="relative overflow-hidden edit-image-preview" @click="editFileInput?.click()">
+                                    <img :src="editPreview || meta.image_url" alt="Meta image" class="h-full w-full object-cover" />
+                                    <div class="absolute inset-0 flex items-center justify-center bg-black/0 hover:bg-black/30 transition-colors">
+                                        <UIcon name="i-heroicons-camera" class="w-8 h-8 text-white opacity-0 group-hover:opacity-100" />
+                                    </div>
+                                    <button v-if="editPreview" type="button"
+                                        class="absolute right-3 top-3 bg-white/80 px-3 py-1 text-xs border border-black"
+                                        @click.stop="resetEditImage">clear</button>
+                                </div>
+                            </div>
+
+                            <div class="flex flex-col gap-3">
+                                <input v-model="editForm.name" type="text"
+                                    class="w-full px-4 py-2 text-base border border-gray-200 focus:border-black focus:outline-none"
+                                    placeholder="Meta name" />
+
+                                <div class="relative">
+                                    <input v-model="editTagSearch" type="text"
+                                        class="w-full px-4 py-2 text-sm border border-gray-200 focus:border-black focus:outline-none"
+                                        placeholder="Tags..."
+                                        @keydown.enter.prevent="handleEditTagEnter"
+                                        @input="filterEditSuggestions"
+                                        @focus="editTagFocused = true"
+                                        @blur="editTagFocused = false" />
+                                    <ul v-if="editSuggestions.length && editTagFocused"
+                                        class="absolute z-10 mt-1 max-h-40 w-full overflow-y-auto border-2 border-black bg-white text-sm">
+                                        <li v-for="s in editSuggestions" :key="s"
+                                            class="cursor-pointer px-4 py-2 hover:bg-neutral-100"
+                                            @pointerdown.prevent="addEditTag(s)">{{ s }}</li>
+                                    </ul>
+                                </div>
+                                <div class="flex flex-wrap gap-2">
+                                    <span v-for="tag in editSelectedTags" :key="tag"
+                                        class="inline-flex items-center gap-1 bg-black px-3 py-1 text-xs font-medium uppercase tracking-[0.3em] text-white">
+                                        {{ tag }}
+                                        <button type="button" class="text-white/70" @click="removeEditTag(tag)">&times;</button>
+                                    </span>
+                                </div>
+
+                                <textarea v-model="editForm.description" rows="3"
+                                    class="w-full px-4 py-3 text-base border border-gray-200 focus:border-black focus:outline-none"
+                                    placeholder="Description" />
+                            </div>
+
+                            <p v-if="editError" class="text-sm text-rose-600">{{ editError }}</p>
+
+                            <div class="flex justify-end gap-3">
+                                <button type="button"
+                                    class="px-5 py-2 border-2 border-black text-sm font-medium hover:bg-gray-50 transition-colors"
+                                    @click="cancelEdit">Cancel</button>
+                                <button type="button"
+                                    class="px-5 py-2 bg-black text-white text-sm font-medium hover:bg-gray-800 transition-colors disabled:opacity-50"
+                                    :disabled="editSubmitting || !editForm.name"
+                                    @click="submitEdit">
+                                    {{ editSubmitting ? 'Saving…' : 'Save' }}
+                                </button>
+                            </div>
+                        </template>
+
+                        <!-- View mode -->
+                        <template v-else>
+                            <div
+                                class="meta-focus-media"
+                                :style="{ cursor: lbDragging ? 'grabbing' : lbScale > 1 ? 'grab' : 'zoom-in' }"
+                                @wheel.prevent="onLbWheel"
+                                @mousedown="onLbMouseDown"
+                                @mousemove="onLbMouseMove"
+                                @mouseup="onLbMouseUp"
+                                @mouseleave="onLbMouseUp"
+                            >
+                                <img
+                                    :src="meta.image_url"
+                                    :alt="`${resolvedTitle} image`"
+                                    :style="{ transform: `scale(${lbScale}) translate(${lbTranslateX / lbScale}px, ${lbTranslateY / lbScale}px)`, transformOrigin: 'center center', transition: lbDragging ? 'none' : 'transform 0.15s ease' }"
+                                    style="width:100%;height:100%;object-fit:cover;user-select:none;"
+                                    draggable="false"
+                                />
+                                <button
+                                    v-if="lbScale > 1"
+                                    type="button"
+                                    class="meta-focus-zoom-reset"
+                                    @click.stop="lbReset"
+                                >Reset zoom</button>
+                            </div>
+                            <p class="meta-focus-description">{{ meta.description || '' }}</p>
+                        </template>
                     </div>
                 </div>
             </div>
@@ -92,7 +161,8 @@ import { computed, reactive, ref, onBeforeUnmount, onMounted, watch } from 'vue'
 import { useRoute } from 'vue-router'
 import type { Meta } from '@/types/meta'
 import { useAuthStore } from '~/stores/auth'
-import { deleteMeta as apiDeleteMeta } from '~/lib/supabase.api'
+import { deleteMeta as apiDeleteMeta, updateMeta as apiUpdateMeta } from '~/lib/supabase.api'
+import { useSupabaseClient } from '~/lib/supabase.client'
 import expandIcon from '@/assets/icons/expand.svg'
 import hoverExpandIcon from '@/assets/icons/expanding.svg'
 import editIcon from '@/assets/icons/edit.svg'
@@ -107,11 +177,115 @@ const emit = defineEmits<{
     (e: 'edit', meta: Meta): void
     (e: 'deleted', metaId: string): void
     (e: 'error', message: string): void
+    (e: 'updated', meta: Meta): void
 }>()
 
 const authStore = useAuthStore()
+const supabase = useSupabaseClient()
 const isLogged = computed(() => authStore.isLogged)
 const toast = useToast()
+
+// ─── Edit mode ───────────────────────────────────────────────────────────────
+const isEditing = ref(false)
+const editForm = reactive({ name: '', description: '' })
+const editSelectedTags = ref<string[]>([])
+const editTagSearch = ref('')
+const editTagFocused = ref(false)
+const editSuggestions = ref<string[]>([])
+const editAvailableTags = ref<string[]>([])
+const editPreview = ref<string | null>(null)
+const editNewFile = ref<File | null>(null)
+const editFileInput = ref<HTMLInputElement | null>(null)
+const editSubmitting = ref(false)
+const editError = ref<string | null>(null)
+
+const openEdit = async () => {
+    editForm.name = props.meta.name || props.meta.title || ''
+    editForm.description = props.meta.description || ''
+    editPreview.value = null
+    editNewFile.value = null
+    editError.value = null
+    const raw = props.meta.tags
+    if (!raw) editSelectedTags.value = []
+    else if (Array.isArray(raw)) editSelectedTags.value = raw
+    else {
+        try {
+            const p = JSON.parse(raw)
+            editSelectedTags.value = Array.isArray(p) ? p : raw.split(',').map((t: string) => t.trim()).filter(Boolean)
+        } catch { editSelectedTags.value = raw.split(',').map((t: string) => t.trim()).filter(Boolean) }
+    }
+    if (props.meta.country_code) {
+        const { data } = await supabase.from('meta_tags').select('name').eq('country_code', props.meta.country_code.toUpperCase()).order('name')
+        editAvailableTags.value = (data ?? []).map((t: any) => t.name)
+        filterEditSuggestions()
+    }
+    isEditing.value = true
+}
+
+const cancelEdit = () => { isEditing.value = false; editError.value = null }
+
+const filterEditSuggestions = () => {
+    const q = editTagSearch.value.trim().toLowerCase()
+    const base = editAvailableTags.value.filter(t => !editSelectedTags.value.includes(t))
+    editSuggestions.value = q ? base.filter(t => t.toLowerCase().includes(q)) : base.slice(0, 8)
+}
+const addEditTag = (tag: string) => {
+    if (!tag.trim() || editSelectedTags.value.includes(tag)) return
+    editSelectedTags.value = [...editSelectedTags.value, tag]
+    editTagSearch.value = ''
+    editSuggestions.value = []
+}
+const removeEditTag = (tag: string) => { editSelectedTags.value = editSelectedTags.value.filter(t => t !== tag) }
+const handleEditTagEnter = () => { if (editTagSearch.value.trim()) addEditTag(editTagSearch.value.trim()) }
+
+const onEditFileChange = (e: Event) => {
+    const file = (e.target as HTMLInputElement).files?.[0]
+    if (file) setEditFile(file)
+}
+const onEditDrop = (e: DragEvent) => {
+    const file = e.dataTransfer?.files?.[0]
+    if (file) setEditFile(file)
+}
+const setEditFile = (file: File) => {
+    editNewFile.value = file
+    editPreview.value = URL.createObjectURL(file)
+}
+const resetEditImage = () => {
+    if (editPreview.value) URL.revokeObjectURL(editPreview.value)
+    editPreview.value = null
+    editNewFile.value = null
+}
+
+const submitEdit = async () => {
+    if (!editForm.name || editSubmitting.value) return
+    editSubmitting.value = true
+    editError.value = null
+    try {
+        let imageUrl = props.meta.image_url
+        if (editNewFile.value) {
+            const ext = editNewFile.value.name.split('.').pop()
+            const name = `public/${crypto.randomUUID()}.${ext}`
+            const { error: upErr } = await supabase.storage.from('images').upload(name, editNewFile.value)
+            if (upErr) throw upErr
+            imageUrl = supabase.storage.from('images').getPublicUrl(name).data.publicUrl
+        }
+        const { data, error } = await apiUpdateMeta(props.meta.id, {
+            name: editForm.name,
+            description: editForm.description,
+            tags: editSelectedTags.value,
+            image_url: imageUrl,
+            updated_by: authStore.user?.id,
+        })
+        if (error) throw error
+        emit('updated', data as Meta)
+        toast.add({ title: 'Méta mise à jour', color: 'green' })
+        isEditing.value = false
+    } catch (err: any) {
+        editError.value = err?.message ?? 'Unable to save.'
+    } finally {
+        editSubmitting.value = false
+    }
+}
 
 
 type Action = {
@@ -138,7 +312,8 @@ const onEditMeta = () => {
         toast.add({ title: 'Connexion requise', description: 'Identifiez-vous pour modifier une méta.', color: 'amber' })
         return
     }
-    emit('edit', props.meta)
+    if (!isFocused.value) isFocused.value = true
+    openEdit()
 }
 
 const isDeleting = ref(false)
@@ -211,6 +386,7 @@ const primaryTag = computed(() => normalizedTags.value[0] || null)
 
 const closeFocus = () => {
     isFocused.value = false
+    isEditing.value = false
     lbReset()
 }
 
@@ -465,6 +641,15 @@ const countryLink = computed(() => {
 .meta-focus-action img {
     width: 25px;
     height: 25px;
+}
+
+.edit-image-panel {
+    overflow: hidden;
+}
+
+.edit-image-preview {
+    height: 220px;
+    cursor: pointer;
 }
 
 .meta-focus-enter-active,

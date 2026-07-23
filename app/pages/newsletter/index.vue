@@ -6,16 +6,25 @@
       <br />
       Restez informé des dernières évolutions, des corrections de bugs, et des ajouts qui rendent Scoutr encore plus performant. Nous sommes ravis de partager avec vous notre progression et de continuer à construire, ensemble, une plateforme qui répond à vos besoins et dépasse vos attentes.
     </p>
+    <!-- RÈGLE RÉDACTION : entrées courtes et factuelles uniquement. Une ligne = une fonctionnalité. Pas de phrases longues, pas de mise en contexte. -->
     <div class="border-l-4 border-black p-6 flex flex-col gap-4 bg-white">
+
+      <!-- 22 juin 2026 -->
+      <div class="gap-3 mt-2">
+        <h2 class="text-2xl font-bold">22 juin 2026</h2>
+        <ul class="list-disc pl-6 mt-2 text-gray-700">
+          <li>Notation des métas dans le quizz — 0 à 5 étoiles après chaque réponse</li>
+          <li>Choix de la source des métas dans le quizz — les tiennes ou celles de la communauté</li>
+        </ul>
+      </div>
 
       <!-- 18 juin 2026 -->
       <div class="gap-3 mt-2">
         <h2 class="text-2xl font-bold">18 juin 2026</h2>
-        <h3 class="text-xl font-semibold text-gray-800">Mises à jour</h3>
         <ul class="list-disc pl-6 mt-2 text-gray-700">
           <li>Correction du chargement des variables d'environnement Supabase et Mapbox</li>
           <li>Focus automatique sur la barre de recherche à l'ouverture de la country list</li>
-          <li>Ajout de 16 pays manquants dans la liste GeoGuessr : Inde, Vietnam, Népal, Chine, Géorgie, Arménie, Maroc, Égypte, Tunisie, Rwanda, Ouganda, Tanzanie, Madagascar, Zimbabwe, Costa Rica, Paraguay</li>
+          <li>16 pays GeoGuessr ajoutés : Inde, Vietnam, Népal, Chine, Géorgie, Arménie, Maroc, Égypte, Tunisie, Rwanda, Ouganda, Tanzanie, Madagascar, Zimbabwe, Costa Rica, Paraguay</li>
         </ul>
         <p class="mt-4 text-gray-700">
           <em><strong>La base de données a été entièrement vidée en préparation d'un beta test qui arrive très prochainement. 🎉</strong></em>

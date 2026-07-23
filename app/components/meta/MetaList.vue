@@ -1,5 +1,6 @@
 <template>
   <section class="space-y-8">
+    <EditMeta v-model="editOpen" :meta="editingMeta" @meta-updated="handleMetaUpdated" />
     <div class="tags-container">
       <AddMeta v-if="country.code" :country="country.code && country.name ? { code: country.code, name: country.name } : null" @meta-added="handleMetaAdded" />
 
@@ -24,7 +25,7 @@
 
       <div v-else class="space-y-6">
         <MetaItem v-for="meta in filteredMetas" :key="meta.id" :meta="meta" @edit="handleMetaEdit"
-          @deleted="handleMetaDeleted" @error="handleMetaError" />
+          @updated="handleMetaUpdated" @deleted="handleMetaDeleted" @error="handleMetaError" />
       </div>
     </div>
   </section>
@@ -33,6 +34,7 @@
 <script setup lang="ts">
 import { computed, ref, watch } from 'vue'
 import AddMeta from '@/components/meta/AddMeta.vue'
+import EditMeta from '@/components/meta/EditMeta.vue'
 import MetaItem from '@/components/Metas/MetaItem.vue'
 import type { Meta } from '@/types/meta'
 import { useSupabaseClient } from '~/lib/supabase.client'
@@ -50,6 +52,8 @@ const loading = ref(false)
 const error = ref<string | null>(null)
 const searchQuery = ref('')
 const isAddFormOpen = ref(false)
+const editOpen = ref(false)
+const editingMeta = ref<Meta | null>(null)
 
 const countryCode = computed(() => props.country.code?.toUpperCase?.() || null)
 
@@ -128,8 +132,14 @@ const clearTags = () => {
 }
 
 const handleMetaEdit = (meta: Meta) => {
-  const title = meta.title || meta.name || meta.id
-  toast.add({ title: 'Édition prochainement', description: `La modification de "${title}" arrive bientôt.`, color: 'amber' })
+  editingMeta.value = meta
+  editOpen.value = true
+}
+
+const handleMetaUpdated = (updated: Meta) => {
+  const idx = metas.value.findIndex(m => m.id === updated.id)
+  if (idx !== -1) metas.value[idx] = updated
+  toast.add({ title: 'Méta mise à jour', color: 'green' })
 }
 
 const handleMetaDeleted = async () => {
