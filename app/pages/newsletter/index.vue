@@ -9,6 +9,20 @@
     <!-- RÈGLE RÉDACTION : entrées courtes et factuelles uniquement. Une ligne = une fonctionnalité. Pas de phrases longues, pas de mise en contexte. -->
     <div class="border-l-4 border-black p-6 flex flex-col gap-4 bg-white">
 
+      <!-- 23 juillet 2026 -->
+      <div class="gap-3 mt-2">
+        <h2 class="text-2xl font-bold">23 juillet 2026</h2>
+        <ul class="list-disc pl-6 mt-2 text-gray-700">
+          <li>Image de header par pays — photos hébergées sur Supabase Storage</li>
+          <li>Métas groupées par tag dans la page pays</li>
+          <li>Tags globaux — plus liés à un pays, réutilisables partout</li>
+          <li>Édition de méta directement dans la dialog de focus</li>
+          <li>Suggestions de tags issues de tous les pays dans le formulaire d'ajout</li>
+          <li>Casse des tags normalisée — première lettre majuscule</li>
+          <li>Tag "daily" renommé en "Official tip"</li>
+        </ul>
+      </div>
+
       <!-- 22 juin 2026 -->
       <div class="gap-3 mt-2">
         <h2 class="text-2xl font-bold">22 juin 2026</h2>

@@ -39,6 +39,7 @@
 
 <script setup lang="ts">
 import { computed } from 'vue'
+import { countries } from '~/data/countries'
 
 interface CountryHeaderProps {
   name: string
@@ -57,16 +58,13 @@ const country = computed(() => ({
   code: props.country.code?.toUpperCase?.() ?? props.country.code,
 }))
 
-const heroImage = computed(() => props.country.heroImage || defaultHero)
-
 const defaultHero =
   'https://images.unsplash.com/photo-1505764706515-aa95265c5abc?auto=format&fit=crop&w=1400&q=80'
 
-const countryFlag = computed(() => {
-  const code = country.value.code
-  if (!code || code.length !== 2) return null
-  const base = 127397
-  return String.fromCodePoint(...code.split('').map((char) => base + char.charCodeAt(0)))
+const heroImage = computed(() => {
+  if (props.country.heroImage) return props.country.heroImage
+  const entry = countries.find(c => c.code.toUpperCase() === country.value.code)
+  return entry?.imageUrl ?? defaultHero
 })
 </script>
 
@@ -75,7 +73,7 @@ const countryFlag = computed(() => {
   content: '';
   position: absolute;
   inset: 0;
-  border-radius: 32px;
+
   box-shadow: inset 0 0 60px rgba(0, 0, 0, 0.35);
   pointer-events: none;
 }

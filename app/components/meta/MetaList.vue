@@ -23,9 +23,15 @@
         Aucune méta pour ce pays pour le moment.
       </p>
 
-      <div v-else class="space-y-6">
-        <MetaItem v-for="meta in filteredMetas" :key="meta.id" :meta="meta" @edit="handleMetaEdit"
-          @updated="handleMetaUpdated" @deleted="handleMetaDeleted" @error="handleMetaError" />
+      <div v-else class="space-y-10">
+        <div v-for="group in groupedMetas" :key="group.tag" class="space-y-4">
+          <h2 class="flex items-center gap-2 text-xl font-bold">
+            {{ group.tag }}
+            <span class="text-neutral-400">›</span>
+          </h2>
+          <MetaItem v-for="meta in group.metas" :key="meta.id" :meta="meta" @edit="handleMetaEdit"
+            @updated="handleMetaUpdated" @deleted="handleMetaDeleted" @error="handleMetaError" />
+        </div>
       </div>
     </div>
   </section>
@@ -62,19 +68,15 @@ const refresh = async () => {
   error.value = null
   try {
     let metasQuery = supabase.from('metas').select('*')
-    let tagsQuery = supabase.from('meta_tags').select('name')
     if (countryCode.value) {
       metasQuery = metasQuery.eq('country_code', countryCode.value)
-      tagsQuery = tagsQuery.eq('country_code', countryCode.value)
     }
-    const [metasRes, tagsRes] = await Promise.all([
-      metasQuery.order('id', { ascending: false }),
-      tagsQuery.order('name'),
-    ])
+    const metasRes = await metasQuery.order('id', { ascending: false })
     if (metasRes.error) throw metasRes.error
-    if (tagsRes.error) throw tagsRes.error
     metas.value = metasRes.data ?? []
-    tagNames.value = (tagsRes.data ?? []).map((t) => t.name)
+    // Infer available tags from the metas themselves
+    const allTags = metas.value.flatMap(m => normalizeTags(m.tags))
+    tagNames.value = [...new Set(allTags)].sort()
   } catch (err: any) {
     console.error(err)
     error.value = err?.message ?? 'Impossible de récupérer les métas'
@@ -117,6 +119,29 @@ const filteredMetas = computed(() => {
     const description = (meta.description || '').toLowerCase()
     return title.includes(query) || description.includes(query)
   })
+})
+
+const groupedMetas = computed(() => {
+  const groups: Record<string, Meta[]> = {}
+  for (const meta of filteredMetas.value) {
+    const tags = normalizeTags(meta.tags)
+    const metaTags = tags.length ? tags : ['(sans tag)']
+    for (const tag of metaTags) {
+      if (!groups[tag]) groups[tag] = []
+      groups[tag].push(meta)
+    }
+  }
+  // Sort groups by the order they appear in tagNames, then alphabetically
+  return Object.entries(groups)
+    .sort(([a], [b]) => {
+      const ia = tagNames.value.indexOf(a)
+      const ib = tagNames.value.indexOf(b)
+      if (ia === -1 && ib === -1) return a.localeCompare(b)
+      if (ia === -1) return 1
+      if (ib === -1) return -1
+      return ia - ib
+    })
+    .map(([tag, metas]) => ({ tag, metas }))
 })
 
 const toggleTag = (tag: string) => {

@@ -144,18 +144,18 @@ const countryCode = computed(() => props.country?.code?.toUpperCase?.())
 const isValid = computed(() => !!form.name && !!form.description && !!form.file && !!countryCode.value)
 
 // Move loadTags definition above watcher to fix ReferenceError
-const loadTags = async (code: string) => {
+const loadTags = async () => {
   const { data, error } = await supabase
     .from('meta_tags')
     .select('name')
-    .eq('country_code', code)
     .order('name')
   if (error) {
     console.error('Error fetching tags', error)
     availableTagNames.value = []
     return
   }
-  availableTagNames.value = (data ?? []).map((t) => t.name)
+  // deduplicate tag names across countries
+  availableTagNames.value = [...new Set((data ?? []).map((t) => t.name))]
   filterSuggestions()
 }
 
@@ -166,7 +166,7 @@ watch(countryCode, async (val) => {
     isCreating.value = true
     return
   }
-  await loadTags(val)
+  await loadTags()
 }, { immediate: true })
 
 watch(() => props.country, (val) => {
@@ -182,7 +182,7 @@ const filterSuggestions = () => {
 }
 
 const addTag = (tag: string) => {
-  const value = tag.trim()
+  const value = normalizeTag(tag)
   if (!value || selectedTags.value.includes(value)) return
   selectedTags.value = [...selectedTags.value, value]
   tagSearch.value = ''
@@ -198,25 +198,32 @@ const removeTag = (tag: string) => {
   selectedTags.value = selectedTags.value.filter((t) => t !== tag)
 }
 
+const normalizeTag = (s: string) => s.trim().charAt(0).toUpperCase() + s.trim().slice(1).toLowerCase()
+
 const handleTagEnter = async () => {
-  const value = tagSearch.value.trim()
+  const value = normalizeTag(tagSearch.value)
   if (!value) return
-  await createTag(value)
+  if (availableTagNames.value.includes(value)) {
+    addTag(value)
+  } else {
+    await createTag(value)
+  }
 }
 
 const createTag = async (value: string) => {
   if (!countryCode.value) return
   try {
-    const { error } = await supabase
+    await supabase
       .from('meta_tags')
-      .insert({ name: value, country_code: countryCode.value, created_at: new Date() })
-    if (error) throw error
+      .upsert({ name: value }, { onConflict: 'name' })
     if (!availableTagNames.value.includes(value)) {
       availableTagNames.value.push(value)
     }
     addTag(value)
   } catch (err) {
     console.error('Error creating tag', err)
+    // Tag creation failed but still add it locally to selectedTags
+    addTag(value)
   }
 }
 

@@ -127,11 +127,9 @@ watch(() => props.meta, async (meta) => {
     }
   }
 
-  if (meta.country_code) {
-    const { data } = await supabase.from('meta_tags').select('name').eq('country_code', meta.country_code.toUpperCase()).order('name')
-    availableTags.value = (data ?? []).map((t) => t.name)
-    filterSuggestions()
-  }
+  const { data } = await supabase.from('meta_tags').select('name').order('name')
+  availableTags.value = (data ?? []).map((t) => t.name)
+  filterSuggestions()
 }, { immediate: true })
 
 const close = () => emit('update:modelValue', false)
