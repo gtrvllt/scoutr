@@ -9,6 +9,18 @@
     <!-- RÈGLE RÉDACTION : entrées courtes et factuelles uniquement. Une ligne = une fonctionnalité. Pas de phrases longues, pas de mise en contexte. -->
     <div class="border-l-4 border-black p-6 flex flex-col gap-4 bg-white">
 
+      <!-- 25 août 2026 -->
+      <div class="gap-3 mt-2">
+        <h2 class="text-2xl font-bold">25 août 2026</h2>
+        <ul class="list-disc pl-6 mt-2 text-gray-700">
+          <li>Ajout de méta depuis la page All Metas — sélecteur de pays avec drapeaux</li>
+          <li>Filtre "My metas only" sur la page All Metas</li>
+          <li>Zoom inline sur l'image du quizz — molette sans clic</li>
+          <li>Mode plein écran dans le quizz — boutons et feedback par-dessus l'image</li>
+          <li>Correction du bug de sauvegarde des tags lors de la création d'une méta</li>
+        </ul>
+      </div>
+
       <!-- 23 juillet 2026 -->
       <div class="gap-3 mt-2">
         <h2 class="text-2xl font-bold">23 juillet 2026</h2>

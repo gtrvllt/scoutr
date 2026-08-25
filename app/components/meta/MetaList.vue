@@ -46,7 +46,7 @@ import type { Meta } from '@/types/meta'
 import { useSupabaseClient } from '~/lib/supabase.client'
 import { useAuthStore } from '~/stores/auth'
 
-const props = defineProps<{ country: { code: string | null; name?: string } }>()
+const props = defineProps<{ country: { code: string | null; name?: string }; onlyMyMetas?: boolean }>()
 
 const supabase = useSupabaseClient()
 const toast = useToast()
@@ -107,6 +107,7 @@ const normalizeTags = (value: Meta['tags']) => {
 
 const filteredMetas = computed(() => {
   const base = metas.value.filter((meta) => {
+    if (props.onlyMyMetas && authStore.user && meta.user_id !== authStore.user.id) return false
     if (!selectedTags.value.length) return true
     const tags = normalizeTags(meta.tags)
     return tags.some((tag) => selectedTags.value.includes(tag))

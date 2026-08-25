@@ -1,9 +1,9 @@
 <template>
   <div class="add-meta-container space-y-4">
     <transition name="fade">
-      <div class="add-meta-block border-2 border-black">
+      <div class="add-meta-block" :class="hideClose ? '' : 'border-2 border-black'">
         <form id="add-meta-form" @submit.prevent="onSubmit">
-          <div v-if="isCreating" class="flex flex-col gap-6  bg-white/95 p-6 lg:flex-row">
+          <div v-if="isCreating" class="flex flex-col gap-6 bg-white/95 lg:flex-row" :class="noPadding ? 'px-0 py-4' : 'p-6'">
             <div class="media-panel flex flex-1 cursor-pointer flex-col " @dragover.prevent @drop.prevent="onDrop">
               <input ref="fileInput" type="file" accept="image/*" class="hidden" @change="onFileChange" />
               <div class="image-container border-2 border-black">
@@ -60,13 +60,13 @@
               <textarea v-model="form.description" rows="3" class="w-full shadow-inner px-5 py-4 text-base"
                 placeholder="Description"></textarea>
             </div>
-            <img class="close-add-meta cursor-pointer" :src="closeIcon" @click="onClose">
+            <img v-if="!hideClose" class="close-add-meta cursor-pointer" :src="closeIcon" @click="onClose">
           </div>
           <button type="button"
             class="add-meta-button group flex items-center justify-center transition hover:bg-black hover:text-white cursor-pointer"
             :class="isCreating ? 'border-1 border-black' : ''"
             :disabled="isCreating && (!isValid || !country || submitting)"
-            :style="{ width: isCreating ? 'calc(100% - 48px)' : '100%', margin: isCreating ? '24px' : '0' }"
+            :style="{ width: isCreating ? (noPadding ? '100%' : 'calc(100% - 48px)') : '100%', margin: isCreating ? (noPadding ? '0' : '24px') : '0' }"
             @click="onSubmit">
 
             {{ submitting ? 'Saving…' : isCreating ? 'Add the meta' : 'Add a meta' }}
@@ -114,13 +114,13 @@ const onClose = () => {
 
 import type { Meta } from '@/types/meta'
 
-const props = defineProps<{ country: { code: string; name: string } | null }>()
+const props = defineProps<{ country: { code: string; name: string } | null; open?: boolean; hideClose?: boolean; noPadding?: boolean }>()
 const emit = defineEmits<{ (e: 'meta-added', meta: Meta): void }>()
 
 const supabase = useSupabaseClient()
 const authStore = useAuthStore()
 
-const isCreating = ref(!props.country)
+const isCreating = ref(props.open || !props.country)
 const submitting = ref(false)
 const submitError = ref<string | null>(null)
 const preview = ref<string | null>(null)
@@ -337,7 +337,7 @@ const submit = async () => {
     const payload = {
       name: form.name,
       description: form.description,
-      tags: selectedTags.value,
+      tags: JSON.stringify(selectedTags.value),
       image_url: imageUrl,
       country_code: countryCode.value,
       user_id: authStore.user?.id

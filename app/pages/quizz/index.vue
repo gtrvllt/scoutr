@@ -4,20 +4,12 @@
 
       <!-- ═══════════════════ SETUP ═══════════════════ -->
       <div v-if="quizState === 'setup'" key="setup" class="max-w-2xl mx-auto py-12 px-4">
-        <div class="text-center mb-10">
-          <h1 class="text-4xl font-bold text-gray-900 mb-2">Scoutr Quizz</h1>
-          <p class="text-gray-500 text-lg">Guess the country from the photo!</p>
-        </div>
+        <p v-if="errorMsg" class="flex items-center gap-2 mb-6 text-sm text-red-600 font-medium">
+          <UIcon name="i-heroicons-x-circle" class="w-4 h-4 shrink-0" />
+          {{ errorMsg }}
+        </p>
 
-        <UAlert
-          v-if="errorMsg"
-          color="error"
-          class="mb-6"
-          icon="i-heroicons-exclamation-circle"
-          :description="errorMsg"
-        />
-
-        <UCard class="shadow-sm">
+        <UCard class="shadow-sm rounded-none">
           <div class="space-y-8 p-1">
 
             <!-- Meta source -->
@@ -173,21 +165,31 @@
       </div>
 
       <!-- ═══════════════════ PLAYING ═══════════════════ -->
-      <div v-else-if="quizState === 'playing'" key="playing" class="min-h-screen flex flex-col bg-gray-50">
+      <div v-else-if="quizState === 'playing'" key="playing" class="flex flex-col bg-gray-50" style="height: calc(100vh - 70px);">
         <!-- Header -->
-        <header class="sticky top-[70px] z-10 flex items-center justify-between px-6 py-3 bg-white border-b shadow-sm">
+        <header class="flex items-center justify-between px-6 py-3 bg-white border-b shadow-sm shrink-0">
           <button
             class="text-sm text-gray-400 hover:text-black transition-colors"
             @click="quizState = 'setup'"
           >← Quit</button>
           <h1 class="text-base font-semibold">Guess the country !</h1>
-          <span class="text-sm font-medium tabular-nums">
-            {{ currentIndex + 1 }}<span class="text-gray-400">/{{ totalQuestions }}</span>
-          </span>
+          <div class="flex items-center gap-2">
+            <span class="text-sm font-medium tabular-nums">
+              {{ currentIndex + 1 }}<span class="text-gray-400">/{{ totalQuestions }}</span>
+            </span>
+            <button
+              v-if="currentQuestion?.meta.image_url"
+              class="flex items-center text-gray-400 hover:text-black transition-colors"
+              aria-label="Fullscreen"
+              @click="fullscreenOpen = true"
+            >
+              <UIcon name="i-heroicons-arrows-pointing-out" class="w-4 h-4" />
+            </button>
+          </div>
         </header>
 
         <!-- Progress bar -->
-        <div class="h-1 bg-gray-100">
+        <div class="h-1 bg-gray-100 shrink-0">
           <div
             class="h-full bg-black transition-all duration-700 ease-out"
             :style="{ width: progressPct + '%' }"
@@ -195,50 +197,53 @@
         </div>
 
         <!-- Question -->
-        <div class="flex-1 flex flex-col items-center justify-center px-4 py-8">
-          <div class="w-full max-w-2xl">
+        <div class="flex-1 flex flex-col px-8 pb-6 overflow-hidden min-h-0">
+          <div class="flex-1 flex flex-col min-h-0">
             <Transition name="slide-question" mode="out-in">
-              <div :key="currentIndex" class="space-y-4">
+              <div :key="currentIndex" class="flex-1 flex flex-col min-h-0">
 
                 <!-- Image -->
-                <h1 v-if="currentQuestion?.meta.name || currentQuestion?.meta.title" class="text-lg font-medium text-gray-700">
-                  {{ currentQuestion?.meta.name || currentQuestion?.meta.title }}
-                </h1>
                 <div
-                  class="relative bg-white border overflow-hidden border-2 border-black group"
-                  style="aspect-ratio: 16/9;"
-                  :class="currentQuestion?.meta.image_url ? 'cursor-zoom-in' : ''"
-                  @click="currentQuestion?.meta.image_url && (lightboxUrl = currentQuestion.meta.image_url, lightboxOpen = true)"
+                  class="relative bg-white overflow-hidden border-2 border-black group flex-1 min-h-0"
+                  :style="{ cursor: inlineDragging ? 'grabbing' : inlineScale > 1 ? 'grab' : 'zoom-in' }"
+                  @wheel.prevent="onInlineWheel"
+                  @mousedown="onInlineMouseDown"
+                  @mousemove="onInlineMouseMove"
+                  @mouseup="onInlineMouseUp"
+                  @mouseleave="onInlineMouseUp"
                 >
                   <img
                     v-if="currentQuestion?.meta.image_url"
                     :src="currentQuestion.meta.image_url"
                     alt="Guess this country"
                     class="w-full h-full object-cover"
+                    :style="{ transform: `scale(${inlineScale}) translate(${inlineTranslateX / inlineScale}px, ${inlineTranslateY / inlineScale}px)`, transformOrigin: 'center center', transition: inlineDragging ? 'none' : 'transform 0.15s ease' }"
+                    draggable="false"
                     loading="eager"
                   />
                   <div v-else class="w-full h-full flex flex-col items-center justify-center text-gray-300 gap-2">
                     <UIcon name="i-heroicons-photo" class="w-16 h-16" />
                     <span class="text-sm">Image not available</span>
                   </div>
-                  <!-- Zoom hint -->
-                  <div
-                    v-if="currentQuestion?.meta.image_url"
-                    class="absolute inset-0 flex items-center justify-center bg-black/0 group-hover:bg-black/20 transition-colors duration-200"
-                  >
-                    <UIcon
-                      name="i-heroicons-magnifying-glass-plus"
-                      class="w-8 h-8 text-white opacity-0 group-hover:opacity-100 drop-shadow transition-opacity duration-200"
-                    />
-                  </div>
+                  <!-- Reset zoom -->
+                  <button
+                    v-if="inlineScale > 1"
+                    class="absolute top-3 left-1/2 -translate-x-1/2 bg-black/70 text-white text-xs px-3 py-1 z-10"
+                    @click.stop="inlineReset"
+                  >Reset zoom</button>
                 </div>
 
+                <!-- Titre -->
+                <p v-if="currentQuestion?.meta.name || currentQuestion?.meta.title" class="text-xl font-semibold text-gray-800 mt-4 mb-1 shrink-0 max-w-2xl mx-auto w-full">
+                  {{ currentQuestion?.meta.name || currentQuestion?.meta.title }}
+                </p>
+
                 <!-- Choices -->
-                <div class="grid grid-cols-2 gap-3">
+                <div class="grid grid-cols-2 gap-3 shrink-0 mt-2 max-w-2xl mx-auto w-full">
                   <button
                     v-for="choice in currentQuestion?.choices"
                     :key="choice.code"
-                    class="flex items-center gap-3 px-4 py-4 border-2 border-black text-left transition-all duration-200 font-medium text-sm"
+                    class="flex items-center gap-3 px-4 py-4 text-left transition-all duration-200 font-medium text-sm border-2 border-black -mt-px -mr-px"
                     :class="getChoiceClass(choice.code)"
                     :disabled="answered"
                     @click="selectAnswer(choice.code)"
@@ -260,7 +265,7 @@
 
                 <!-- Feedback + navigation -->
                 <Transition name="fade-up">
-                  <div v-if="answered" class="space-y-3 pt-1">
+                  <div v-if="answered" class="space-y-3 pt-1 shrink-0 max-w-2xl mx-auto w-full">
 
                     <!-- Correctness banner -->
                     <p
@@ -377,40 +382,92 @@
 
     </Transition>
 
-    <!-- ═══════════════════ LIGHTBOX ═══════════════════ -->
+    <!-- ═══════════════════ FULLSCREEN ═══════════════════ -->
     <Transition name="fade">
       <div
-        v-if="lightboxOpen"
-        class="fixed inset-0 z-50 flex items-center justify-center bg-black/80 overflow-hidden"
-        :style="{ cursor: lbDragging ? 'grabbing' : lbScale > 1 ? 'grab' : 'zoom-out' }"
-        @click="onLbOverlayClick"
+        v-if="fullscreenOpen"
+        class="fixed z-50 overflow-hidden"
+        style="top: 70px; left: 0; right: 0; bottom: 0;"
+        :style="{ cursor: lbDragging ? 'grabbing' : lbScale > 1 ? 'grab' : 'zoom-in' }"
         @wheel.prevent="onLbWheel"
         @mousedown="onLbMouseDown"
         @mousemove="onLbMouseMove"
         @mouseup="onLbMouseUp"
         @mouseleave="onLbMouseUp"
       >
+        <!-- Image -->
         <img
-          :src="lightboxUrl"
+          v-if="currentQuestion?.meta.image_url"
+          :src="currentQuestion.meta.image_url"
           alt=""
-          class="max-h-full max-w-full object-contain shadow-2xl select-none"
+          class="w-full h-full object-cover select-none"
           :style="{ transform: `scale(${lbScale}) translate(${lbTranslateX / lbScale}px, ${lbTranslateY / lbScale}px)`, transformOrigin: 'center center', transition: lbDragging ? 'none' : 'transform 0.15s ease' }"
           draggable="false"
-          @click="lbScale === 1 ? closeLightbox() : $event.stopPropagation()"
         />
-        <!-- Reset zoom hint -->
-        <button
-          v-if="lbScale > 1"
-          class="absolute bottom-4 left-1/2 -translate-x-1/2 text-xs text-white/70 bg-black/40 px-3 py-1 rounded-full hover:text-white transition-colors"
-          @click.stop="lbReset"
-        >Reset zoom</button>
-        <button
-          class="absolute top-4 right-4 text-white hover:text-gray-300 transition-colors"
-          aria-label="Close"
-          @click.stop="closeLightbox"
+
+        <!-- Overlay bas : boutons + feedback -->
+        <div
+          class="absolute bottom-0 left-0 right-0 px-6 pb-6 transition-all duration-300"
+          :class="answered ? 'bg-black/70 backdrop-blur-sm' : ''"
+          @click.stop @wheel.stop @mousedown.stop
         >
-          <UIcon name="i-heroicons-x-mark" class="w-8 h-8" />
-        </button>
+          <!-- Nom de la meta -->
+          <div v-if="currentQuestion?.meta.name || currentQuestion?.meta.title" class="max-w-2xl mx-auto w-full pt-4 pb-2">
+            <p class="text-xl font-semibold text-white" :class="answered ? '' : 'inline-block px-3 py-1 backdrop-blur-sm bg-black/70'">
+              {{ currentQuestion?.meta.name || currentQuestion?.meta.title }}
+            </p>
+          </div>
+          <div v-else class="pt-4" />
+
+          <!-- Boutons -->
+          <div class="grid grid-cols-2 gap-3 max-w-2xl mx-auto w-full">
+            <button
+              v-for="choice in currentQuestion?.choices"
+              :key="choice.code"
+              class="flex items-center gap-3 px-4 py-4 text-left transition-all duration-200 font-medium text-base border-2 text-white backdrop-blur-md bg-black/65"
+              :class="getFsChoiceClass(choice.code)"
+              :disabled="answered"
+              @click="selectAnswer(choice.code)"
+            >
+              <span class="text-xl shrink-0">{{ getFlag(choice.code) }}</span>
+              <span class="flex-1">{{ choice.name }}</span>
+              <UIcon v-if="answered && choice.code === currentQuestion?.correctCode" name="i-heroicons-check-circle-solid" class="shrink-0 w-5 h-5 text-green-400" />
+              <UIcon v-else-if="answered && choice.code === selectedAnswer && choice.code !== currentQuestion?.correctCode" name="i-heroicons-x-circle-solid" class="shrink-0 w-5 h-5 text-red-400" />
+            </button>
+          </div>
+
+          <!-- Feedback : toujours présent pour réserver la hauteur -->
+          <div class="max-w-2xl mx-auto w-full overflow-hidden transition-all duration-300" :style="answered ? 'max-height: 200px; opacity: 1' : 'max-height: 0; opacity: 0'">
+            <div class="space-y-2 py-3">
+              <p class="text-sm font-medium" :class="lastAnswerCorrect ? 'text-green-400' : 'text-red-400'">
+                {{ lastAnswerCorrect ? '✓ Correct!' : `✗ It was ${currentQuestion?.correctName}` }}
+              </p>
+              <div v-if="currentQuestion?.meta.description" class="text-sm text-white/80 leading-relaxed">
+                {{ currentQuestion?.meta.description }}
+              </div>
+              <StarRating
+                v-if="currentQuestion?.meta.id"
+                :meta-id="currentQuestion.meta.id"
+                :is-logged-in="authStore.isLogged"
+              />
+              <div class="flex justify-end pb-1">
+                <UButton v-if="currentIndex < totalQuestions - 1" color="neutral" trailing-icon="i-heroicons-arrow-right" @click="nextQuestion">Next</UButton>
+                <UButton v-else color="neutral" trailing-icon="i-heroicons-flag" @click="showResults">Results</UButton>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Compteur + bouton fermer -->
+        <div class="absolute top-3 right-3 flex items-center gap-2 backdrop-blur-sm bg-black/50 px-3 py-1.5">
+          <span class="text-base font-medium tabular-nums text-white/80">
+            {{ currentIndex + 1 }}<span class="text-white/50">/{{ totalQuestions }}</span>
+          </span>
+          <button class="flex items-center text-white/80 hover:text-white transition-colors" @click.stop="closeFullscreen">
+            <UIcon name="i-heroicons-arrows-pointing-in" class="w-5 h-5" />
+          </button>
+        </div>
+        <button v-if="lbScale > 1" class="absolute top-4 left-1/2 -translate-x-1/2 text-xs text-white/70 bg-black/40 px-3 py-1 hover:text-white" @click.stop="lbReset">Reset zoom</button>
       </div>
     </Transition>
   </div>
@@ -472,12 +529,20 @@ const loading = ref(false)
 const errorMsg = ref<string | null>(null)
 const lightboxOpen = ref(false)
 const lightboxUrl = ref('')
+const fullscreenOpen = ref(false)
 const lbScale = ref(1)
 const lbTranslateX = ref(0)
 const lbTranslateY = ref(0)
 const lbDragging = ref(false)
 let lbDragStart = { x: 0, y: 0, tx: 0, ty: 0 }
 let lbHadDrag = false
+
+const inlineScale = ref(1)
+const inlineTranslateX = ref(0)
+const inlineTranslateY = ref(0)
+const inlineDragging = ref(false)
+let inlineDragStart = { x: 0, y: 0, tx: 0, ty: 0 }
+let inlineHadDrag = false
 
 function lbReset() {
   lbScale.value = 1
@@ -487,6 +552,16 @@ function lbReset() {
 function closeLightbox() {
   lightboxOpen.value = false
   lbReset()
+}
+function closeFullscreen() {
+  fullscreenOpen.value = false
+  lbReset()
+}
+function getFsChoiceClass(code: string) {
+  if (!answered.value) return 'border-white/30 hover:border-white hover:bg-white/10'
+  if (code === currentQuestion.value?.correctCode) return 'border-green-400 bg-green-400/20'
+  if (code === selectedAnswer.value) return 'border-red-400 bg-red-400/20'
+  return 'border-white/20 opacity-50'
 }
 function onLbOverlayClick() {
   if (lbHadDrag) { lbHadDrag = false; return }
@@ -511,6 +586,32 @@ function onLbMouseMove(e: MouseEvent) {
 }
 function onLbMouseUp() {
   lbDragging.value = false
+}
+
+function inlineReset() {
+  inlineScale.value = 1
+  inlineTranslateX.value = 0
+  inlineTranslateY.value = 0
+}
+function onInlineWheel(e: WheelEvent) {
+  const delta = e.deltaY > 0 ? 0.9 : 1.1
+  inlineScale.value = Math.min(8, Math.max(1, inlineScale.value * delta))
+  if (inlineScale.value === 1) { inlineTranslateX.value = 0; inlineTranslateY.value = 0 }
+}
+function onInlineMouseDown(e: MouseEvent) {
+  if (inlineScale.value <= 1) return
+  inlineDragging.value = true
+  inlineHadDrag = false
+  inlineDragStart = { x: e.clientX, y: e.clientY, tx: inlineTranslateX.value, ty: inlineTranslateY.value }
+}
+function onInlineMouseMove(e: MouseEvent) {
+  if (!inlineDragging.value) return
+  inlineHadDrag = true
+  inlineTranslateX.value = inlineDragStart.tx + (e.clientX - inlineDragStart.x)
+  inlineTranslateY.value = inlineDragStart.ty + (e.clientY - inlineDragStart.y)
+}
+function onInlineMouseUp() {
+  inlineDragging.value = false
 }
 
 const onKeydown = (e: KeyboardEvent) => { if (e.key === 'Escape') closeLightbox() }
@@ -724,6 +825,8 @@ function nextQuestion() {
   currentIndex.value++
   selectedAnswer.value = null
   answered.value = false
+  inlineReset()
+  lbReset()
 }
 
 function showResults() {

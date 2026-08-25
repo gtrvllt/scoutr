@@ -67,6 +67,8 @@ async function rate(n: number) {
 
 .star.filled {
   color: #000;
+  -webkit-text-stroke: 1.5px white;
+  paint-order: stroke fill;
 }
 
 .star:not(:disabled):hover {
