@@ -35,16 +35,27 @@
                   placeholder="Meta name" />
                 <div class="tag-select w-full px-4">
                   <div class="relative">
-                    <input v-model="tagSearch" type="text" class="w-full px-4 py-2 text-sm" placeholder="Tags..."
-                      @keydown.enter.prevent="handleTagEnter" @input="filterSuggestions" @focus="tagFocused = true"
+                    <input v-model="tagSearch" type="text" class="w-full px-4 py-2 text-sm"
+                      :class="showErrors && selectedTags.length === 0 ? 'ring-2 ring-red-500' : ''"
+                      placeholder="Tags..."
+                      @keydown.enter.prevent="handleTagEnter"
+                      @keydown.down.prevent="navigateSuggestions(1)"
+                      @keydown.up.prevent="navigateSuggestions(-1)"
+                      @keydown.tab="handleTabKey"
+                      @input="filterSuggestions" @focus="tagFocused = true"
                       @blur="tagFocused = false" />
                     <ul v-if="suggestions.length && tagFocused"
                       class="suggestions absolute z-10 mt-2 max-h-40 w-full overflow-y-auto border-2 border-black bg-white text-sm">
-                      <li v-for="suggestion in suggestions" :key="suggestion"
-                        class="cursor-pointer px-4 py-2 hover:bg-neutral-100" @pointerdown.prevent="addTag(suggestion)">
+                      <li v-for="(suggestion, index) in suggestions" :key="suggestion"
+                        class="cursor-pointer px-4 py-2 hover:bg-neutral-100"
+                        :class="{ 'bg-neutral-100': index === activeSuggestionIndex }"
+                        @pointerdown.prevent="addTag(suggestion)">
                         {{ truncate(suggestion) }}
                       </li>
                     </ul>
+                    <p v-if="showErrors && selectedTags.length === 0" class="flex items-center gap-1 mt-1 text-xs text-red-600 font-medium">
+                      <span>✕</span> At least one tag is required
+                    </p>
                   </div>
                 </div>
 
@@ -65,7 +76,7 @@
           <button type="button"
             class="add-meta-button group flex items-center justify-center transition hover:bg-black hover:text-white cursor-pointer"
             :class="isCreating ? 'border-1 border-black' : ''"
-            :disabled="isCreating && (!isValid || !country || submitting)"
+            :disabled="isCreating && (!country || submitting)"
             :style="{ width: isCreating ? (noPadding ? '100%' : 'calc(100% - 48px)') : '100%', margin: isCreating ? (noPadding ? '0' : '24px') : '0' }"
             @click="onSubmit">
 
@@ -123,6 +134,7 @@ const authStore = useAuthStore()
 const isCreating = ref(props.open || !props.country)
 const submitting = ref(false)
 const submitError = ref<string | null>(null)
+const showErrors = ref(false)
 const preview = ref<string | null>(null)
 const fileInput = ref<HTMLInputElement | null>(null)
 const pasteInput = ref<HTMLInputElement | null>(null)
@@ -130,6 +142,7 @@ const availableTagNames = ref<string[]>([])
 const selectedTags = ref<string[]>([])
 const tagSearch = ref('')
 const suggestions = ref<string[]>([])
+const activeSuggestionIndex = ref(-1)
 const tagFocused = ref(false)
 
 const form = reactive({
@@ -141,7 +154,7 @@ const form = reactive({
 
 const countryCode = computed(() => props.country?.code?.toUpperCase?.())
 
-const isValid = computed(() => !!form.name && !!form.description && !!form.file && !!countryCode.value)
+const isValid = computed(() => !!form.name && !!form.file && !!countryCode.value && selectedTags.value.length > 0)
 
 // Move loadTags definition above watcher to fix ReferenceError
 const loadTags = async () => {
@@ -179,6 +192,22 @@ const filterSuggestions = () => {
   const query = tagSearch.value.trim().toLowerCase()
   const base = availableTagNames.value.filter((tag) => !selectedTags.value.includes(tag))
   suggestions.value = query ? base.filter((tag) => tag.toLowerCase().includes(query)) : base.slice(0, 8)
+  activeSuggestionIndex.value = -1
+}
+
+const navigateSuggestions = (dir: number) => {
+  if (!suggestions.value.length) return
+  activeSuggestionIndex.value = (activeSuggestionIndex.value + dir + suggestions.value.length) % suggestions.value.length
+}
+
+const handleTabKey = (e: KeyboardEvent) => {
+  if (activeSuggestionIndex.value >= 0 && suggestions.value[activeSuggestionIndex.value]) {
+    e.preventDefault()
+    addTag(suggestions.value[activeSuggestionIndex.value])
+  } else if (suggestions.value.length) {
+    e.preventDefault()
+    addTag(suggestions.value[0])
+  }
 }
 
 const addTag = (tag: string) => {
@@ -187,6 +216,7 @@ const addTag = (tag: string) => {
   selectedTags.value = [...selectedTags.value, value]
   tagSearch.value = ''
   suggestions.value = []
+  activeSuggestionIndex.value = -1
 }
 
 const truncate = (s: string, max = 20) => {
@@ -201,6 +231,10 @@ const removeTag = (tag: string) => {
 const normalizeTag = (s: string) => s.trim().charAt(0).toUpperCase() + s.trim().slice(1).toLowerCase()
 
 const handleTagEnter = async () => {
+  if (activeSuggestionIndex.value >= 0 && suggestions.value[activeSuggestionIndex.value]) {
+    addTag(suggestions.value[activeSuggestionIndex.value])
+    return
+  }
   const value = normalizeTag(tagSearch.value)
   if (!value) return
   if (availableTagNames.value.includes(value)) {
@@ -312,6 +346,7 @@ const onSubmit = async () => {
     isCreating.value = true
     return
   }
+  showErrors.value = true
   if (!isValid.value || !props.country) return
   await submit()
 }
@@ -364,6 +399,7 @@ const resetForm = () => {
   tagSearch.value = ''
   suggestions.value = []
   submitError.value = null
+  showErrors.value = false
 }
 </script>
 

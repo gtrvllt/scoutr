@@ -35,13 +35,17 @@
                 <input v-model="tagSearch" type="text" class="w-full px-4 py-2 text-sm border border-gray-200 focus:border-black focus:outline-none"
                   placeholder="Tags..."
                   @keydown.enter.prevent="handleTagEnter"
+                  @keydown.down.prevent="navigateSuggestions(1)"
+                  @keydown.up.prevent="navigateSuggestions(-1)"
+                  @keydown.tab="handleTabKey"
                   @input="filterSuggestions"
                   @focus="tagFocused = true"
                   @blur="tagFocused = false" />
                 <ul v-if="suggestions.length && tagFocused"
                   class="absolute z-10 mt-1 max-h-40 w-full overflow-y-auto border-2 border-black bg-white text-sm">
-                  <li v-for="s in suggestions" :key="s"
+                  <li v-for="(s, index) in suggestions" :key="s"
                     class="cursor-pointer px-4 py-2 hover:bg-neutral-100"
+                    :class="{ 'bg-neutral-100': index === activeSuggestionIndex }"
                     @pointerdown.prevent="addTag(s)">{{ s }}</li>
                 </ul>
               </div>
@@ -98,6 +102,7 @@ const selectedTags = ref<string[]>([])
 const tagSearch = ref('')
 const tagFocused = ref(false)
 const suggestions = ref<string[]>([])
+const activeSuggestionIndex = ref(-1)
 const availableTags = ref<string[]>([])
 const preview = ref<string | null>(null)
 const newFile = ref<File | null>(null)
@@ -138,6 +143,22 @@ const filterSuggestions = () => {
   const q = tagSearch.value.trim().toLowerCase()
   const base = availableTags.value.filter(t => !selectedTags.value.includes(t))
   suggestions.value = q ? base.filter(t => t.toLowerCase().includes(q)) : base.slice(0, 8)
+  activeSuggestionIndex.value = -1
+}
+
+const navigateSuggestions = (dir: number) => {
+  if (!suggestions.value.length) return
+  activeSuggestionIndex.value = (activeSuggestionIndex.value + dir + suggestions.value.length) % suggestions.value.length
+}
+
+const handleTabKey = (e: KeyboardEvent) => {
+  if (activeSuggestionIndex.value >= 0 && suggestions.value[activeSuggestionIndex.value]) {
+    e.preventDefault()
+    addTag(suggestions.value[activeSuggestionIndex.value])
+  } else if (suggestions.value.length) {
+    e.preventDefault()
+    addTag(suggestions.value[0])
+  }
 }
 
 const addTag = (tag: string) => {
@@ -145,6 +166,7 @@ const addTag = (tag: string) => {
   selectedTags.value = [...selectedTags.value, tag]
   tagSearch.value = ''
   suggestions.value = []
+  activeSuggestionIndex.value = -1
 }
 
 const removeTag = (tag: string) => {
@@ -152,6 +174,10 @@ const removeTag = (tag: string) => {
 }
 
 const handleTagEnter = () => {
+  if (activeSuggestionIndex.value >= 0 && suggestions.value[activeSuggestionIndex.value]) {
+    addTag(suggestions.value[activeSuggestionIndex.value])
+    return
+  }
   if (tagSearch.value.trim()) addTag(tagSearch.value.trim())
 }
 

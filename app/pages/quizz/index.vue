@@ -321,23 +321,24 @@
       </div>
 
       <!-- ═══════════════════ RESULTS ═══════════════════ -->
-      <div v-else-if="quizState === 'results'" key="results" class="max-w-2xl mx-auto py-12 px-4">
-        <div class="text-center mb-8">
-          <h1 class="text-3xl font-bold text-gray-900 mb-4">Results</h1>
-          <div class="inline-flex items-baseline gap-1 mb-3">
+      <div v-else-if="quizState === 'results'" key="results" class="flex flex-col bg-gray-50" style="height: calc(100vh - 70px);">
+        <!-- Score header -->
+        <div class="text-center py-6 px-4 shrink-0 bg-white border-b border-gray-100">
+          <div class="inline-flex items-baseline gap-1 mb-2">
             <span class="text-7xl font-black tabular-nums">{{ score }}</span>
             <span class="text-3xl text-gray-400 font-bold">/{{ totalQuestions }}</span>
           </div>
           <p class="text-2xl mb-1">{{ resultEmoji }}</p>
-          <p class="text-gray-500">{{ resultMessage }}</p>
+          <p class="text-gray-500 text-sm">{{ resultMessage }}</p>
         </div>
 
-        <UCard class="shadow-sm">
-          <ul class="divide-y divide-gray-100">
+        <!-- Scrollable list -->
+        <div class="flex-1 overflow-y-auto min-h-0 px-4 py-2 max-w-2xl mx-auto w-full">
+          <ul class="divide-y divide-gray-100 bg-white border border-gray-100 shadow-sm">
             <li
               v-for="(q, i) in questions"
               :key="i"
-              class="flex items-center gap-3 py-3 first:pt-0 last:pb-0"
+              class="flex items-center gap-3 px-4 py-3"
             >
               <span class="text-lg w-6 text-center shrink-0">{{ q.isCorrect ? '✅' : '❌' }}</span>
               <div
@@ -360,24 +361,25 @@
               </div>
             </li>
           </ul>
+        </div>
 
-          <template #footer>
-            <div class="flex justify-between gap-3">
-              <UButton
-                variant="outline"
-                color="neutral"
-                leading-icon="i-heroicons-arrow-left"
-                @click="quizState = 'setup'"
-              >Change settings</UButton>
-              <UButton
-                color="neutral"
-                leading-icon="i-heroicons-arrow-path"
-                :loading="loading"
-                @click="restartSameConfig"
-              >Scout again</UButton>
-            </div>
-          </template>
-        </UCard>
+        <!-- Footer buttons -->
+        <div class="shrink-0 bg-white border-t border-gray-100 px-4 py-4">
+          <div class="flex justify-between gap-3 max-w-2xl mx-auto w-full">
+            <UButton
+              variant="outline"
+              color="neutral"
+              leading-icon="i-heroicons-arrow-left"
+              @click="quizState = 'setup'"
+            >Change settings</UButton>
+            <UButton
+              color="neutral"
+              leading-icon="i-heroicons-arrow-path"
+              :loading="loading"
+              @click="restartSameConfig"
+            >Scout again</UButton>
+          </div>
+        </div>
       </div>
 
     </Transition>
