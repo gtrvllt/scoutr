@@ -439,7 +439,7 @@
           </div>
 
           <!-- Feedback : toujours présent pour réserver la hauteur -->
-          <div class="max-w-2xl mx-auto w-full overflow-hidden transition-all duration-300" :style="answered ? 'max-height: 200px; opacity: 1' : 'max-height: 0; opacity: 0'">
+          <div class="max-w-2xl mx-auto w-full overflow-hidden transition-all duration-300" :style="answered ? 'max-height: 500px; opacity: 1' : 'max-height: 0; opacity: 0'">
             <div class="space-y-2 py-3">
               <p class="text-sm font-medium" :class="lastAnswerCorrect ? 'text-green-400' : 'text-red-400'">
                 {{ lastAnswerCorrect ? '✓ Correct!' : `✗ It was ${currentQuestion?.correctName}` }}
@@ -453,8 +453,20 @@
                 :is-logged-in="authStore.isLogged"
               />
               <div class="flex justify-end pb-1">
-                <UButton v-if="currentIndex < totalQuestions - 1" color="neutral" trailing-icon="i-heroicons-arrow-right" @click="nextQuestion">Next</UButton>
-                <UButton v-else color="neutral" trailing-icon="i-heroicons-flag" @click="showResults">Results</UButton>
+                <button
+                  v-if="currentIndex < totalQuestions - 1"
+                  class="flex items-center gap-2 border-2 border-white text-white px-5 py-2 text-xs font-semibold uppercase tracking-widest hover:bg-white hover:text-black transition-colors"
+                  @click="nextQuestion"
+                >
+                  Next <UIcon name="i-heroicons-arrow-right" class="w-4 h-4" />
+                </button>
+                <button
+                  v-else
+                  class="flex items-center gap-2 border-2 border-white bg-white text-black px-5 py-2 text-xs font-semibold uppercase tracking-widest hover:bg-transparent hover:text-white transition-colors"
+                  @click="showResults"
+                >
+                  Results <UIcon name="i-heroicons-flag" class="w-4 h-4" />
+                </button>
               </div>
             </div>
           </div>
