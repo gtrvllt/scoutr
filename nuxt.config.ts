@@ -48,5 +48,6 @@ export default defineNuxtConfig({
     preference: 'light',
     fallback: 'light',
     storageKey: null,
+    classSuffix: '',
   },
 })
